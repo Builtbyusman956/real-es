@@ -1,11 +1,16 @@
 // src/components/TrustStats.jsx
+import { RiShieldCheckFill } from "react-icons/ri";
+import { MdOutlineHomeWork } from "react-icons/md";
+import { HiLockClosed } from "react-icons/hi";
+import { FaChartLine } from "react-icons/fa";
+import { TbMapPin2 } from "react-icons/tb";
 
 const STATS = [
-  { value: "1,200+",  label: "Verified Agents",       icon: "🛡" },
-  { value: "5,000+",  label: "Properties Listed",     icon: "🏠" },
-  { value: "₦2B+",    label: "Transactions Secured",  icon: "🔒" },
-  { value: "98%",     label: "Fraud-Free Rate",        icon: "✅" },
-  { value: "36",      label: "States Covered",         icon: "📍" },
+  { value: "1,200+", label: "Verified Agents",      Icon: RiShieldCheckFill },
+  { value: "5,000+", label: "Properties Listed",    Icon: MdOutlineHomeWork },
+  { value: "₦2B+",   label: "Transactions Secured", Icon: HiLockClosed      },
+  { value: "98%",    label: "Fraud-Free Rate",       Icon: FaChartLine       },
+  { value: "36",     label: "States Covered",        Icon: TbMapPin2         },
 ];
 
 const TrustStats = () => {
@@ -14,39 +19,23 @@ const TrustStats = () => {
       <div className="max-w-7xl mx-auto">
 
         {/* Desktop — single row */}
-        <div className="hidden md:flex items-center justify-between gap-4">
-          {STATS.map(({ value, label, icon }, i) => (
-            <div key={label} className="flex items-center gap-4 flex-1">
-
-              {/* Stat */}
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{icon}</span>
-                <div>
-                  <p className="text-[#C9A84C] text-2xl font-bold leading-none">{value}</p>
-                  <p className="text-[#8A9BB5] text-xs mt-0.5">{label}</p>
-                </div>
-              </div>
-
-              {/* Divider — not after last item */}
-              {i < STATS.length - 1 && (
-                <div className="flex-1 flex justify-end">
-                  <div className="w-px h-8 bg-[#1A2E4A]" />
-                </div>
-              )}
+        <div className="hidden md:grid grid-cols-5 gap-8">
+          {STATS.map(({ value, label, Icon }) => (
+            <div key={label} className="text-center">
+              <Icon size={32} className="text-[#C9A84C] mx-auto mb-3" />
+              <p className="text-[#C9A84C] text-3xl font-bold leading-none mb-1">{value}</p>
+              <p className="text-[#8A9BB5] text-sm">{label}</p>
             </div>
           ))}
         </div>
 
         {/* Mobile — 2 col grid */}
         <div className="md:hidden grid grid-cols-2 gap-4">
-          {STATS.map(({ value, label, icon }) => (
-            <div key={label}
-              className="flex items-center gap-3 bg-[#1A2E4A] rounded-2xl px-4 py-3 border border-[#C9A84C]/10">
-              <span className="text-xl">{icon}</span>
-              <div>
-                <p className="text-[#C9A84C] text-xl font-bold leading-none">{value}</p>
-                <p className="text-[#8A9BB5] text-[11px] mt-0.5">{label}</p>
-              </div>
+          {STATS.map(({ value, label, Icon }) => (
+            <div key={label} className="text-center py-4">
+              <Icon size={28} className="text-[#C9A84C] mx-auto mb-2" />
+              <p className="text-[#C9A84C] text-2xl font-bold leading-none mb-1">{value}</p>
+              <p className="text-[#8A9BB5] text-xs">{label}</p>
             </div>
           ))}
         </div>
@@ -60,7 +49,7 @@ const TrustStats = () => {
           <div className="flex items-center gap-2 flex-shrink-0">
             {["NIN Verified", "BVN Secured", "CAC Registered"].map((b) => (
               <span key={b}
-                className="bg-[#C9A84C]/10 border border-[#C9A84C]/20 text-[#C9A84C] text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                className="bg-[#C9A84C]/10 border border-[#C9A84C]/20 text-[#C9A84C] text-[10px] font-semibold px-2.5 py-1">
                 ✔ {b}
               </span>
             ))}

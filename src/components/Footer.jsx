@@ -1,5 +1,17 @@
 // src/components/Footer.jsx
 import { Link } from "react-router-dom";
+import { 
+  FaXTwitter, 
+  FaInstagram, 
+  FaFacebookF, 
+  FaWhatsapp 
+} from "react-icons/fa6";
+import { 
+  RiShieldCheckFill, 
+  RiGlobalLine,
+  RiBuildingLine,
+  RiVerifiedBadgeFill
+} from "react-icons/ri";
 
 const LINKS = {
   Platform: [
@@ -22,8 +34,21 @@ const LINKS = {
   ],
 };
 
+const SOCIAL_LINKS = [
+  { icon: FaXTwitter,   href: "https://twitter.com/nret",       label: "Twitter",   color: "hover:bg-black hover:text-white" },
+  { icon: FaInstagram,  href: "https://instagram.com/nret",     label: "Instagram", color: "hover:bg-pink-600 hover:text-white" },
+  { icon: FaFacebookF,  href: "https://facebook.com/nret",      label: "Facebook",  color: "hover:bg-blue-600 hover:text-white" },
+  { icon: FaWhatsapp,   href: "https://wa.me/2348006733723",    label: "WhatsApp",  color: "hover:bg-green-600 hover:text-white" },
+];
+
+const BADGES = [
+  { icon: RiVerifiedBadgeFill, label: "NIN Verified" },
+  { icon: RiShieldCheckFill,   label: "BVN Secured" },
+  { icon: RiBuildingLine,      label: "CAC Registered" },
+];
+
 const Footer = () => (
-  <footer className="bg-[#0A1628] px-6 sm:px-8 p-4 lg:px-12 pt-16 pb-8">
+  <footer className="bg-[#0A1628] px-6 sm:px-8 lg:px-12 pt-16 pb-8">
     <div className="max-w-7xl mx-auto">
 
       {/* Top row */}
@@ -32,21 +57,30 @@ const Footer = () => (
         {/* Brand */}
         <div className="col-span-2 md:col-span-1">
           <div className="mb-4">
-            <p className="text-[#F7F4EF] font-bold text-xl tracking-wide">NRET</p>
+            <div className="flex items-center gap-2 mb-1">
+              <RiGlobalLine className="text-[#C9A84C]" size={24} />
+              <p className="text-[#F7F4EF] font-bold text-xl tracking-wide">NRET</p>
+            </div>
             <p className="text-[#C9A84C] text-[10px] font-semibold uppercase tracking-[0.18em]">
               Nigeria Real Estate Trust
             </p>
           </div>
-          <p className="text-[#8A9BB5] text-sm leading-relaxed mb-5">
+          <p className="text-[#8A9BB5] text-sm leading-relaxed mb-6">
             Nigeria's most trusted platform for verified property listings, agent checks, and fraud-free real estate transactions.
           </p>
-          {/* Socials */}
-          <div className="flex gap-2">
-            {["tw", "ig", "fb", "wa"].map((s) => (
-              <div key={s}
-                className="w-8 h-8 rounded-lg bg-[#1A2E4A] hover:bg-[#C9A84C]/20 border border-[#1A2E4A] hover:border-[#C9A84C]/30 flex items-center justify-center text-[#8A9BB5] hover:text-[#C9A84C] text-[10px] font-bold uppercase cursor-pointer transition duration-200">
-                {s}
-              </div>
+          
+          {/* Socials - Real Icons */}
+          <div className="flex gap-3">
+            {SOCIAL_LINKS.map(({ icon: Icon, href, label, color }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className={`w-10 h-10 rounded-xl bg-[#1A2E4A] border border-[#1A2E4A] flex items-center justify-center text-[#8A9BB5] transition-all duration-300 ${color} hover:border-transparent hover:scale-110`}>
+                <Icon size={18} />
+              </a>
             ))}
           </div>
         </div>
@@ -59,8 +93,9 @@ const Footer = () => (
               {items.map(({ label, to }) => (
                 <li key={label}>
                   <Link to={to}
-                    className="text-[#8A9BB5] text-sm hover:text-[#C9A84C] transition duration-200">
+                    className="text-[#8A9BB5] text-sm hover:text-[#C9A84C] transition duration-200 relative group">
                     {label}
+                    <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#C9A84C] transition-all duration-300 group-hover:w-full"></span>
                   </Link>
                 </li>
               ))}
@@ -70,16 +105,20 @@ const Footer = () => (
       </div>
 
       {/* Bottom row */}
-      <div className="pt-7 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="pt-7 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-[#8A9BB5] text-xs text-center sm:text-left">
-          © {new Date().getFullYear()} NRET — Nigeria Real Estate Trust. All rights reserved.
+          © {new Date().getFullYear()} NRET Nigeria Real Estate Trust. All rights reserved.
         </p>
-        <div className="flex items-center gap-2">
-          {["NIN Verified", "BVN Secured", "CAC Registered"].map((b) => (
-            <span key={b}
-              className="bg-[#C9A84C]/10 border border-[#C9A84C]/15 text-[#C9A84C] text-[9px] font-semibold px-2 py-0.5 rounded-full">
-              ✔ {b}
-            </span>
+        
+        {/* Badges with Icons */}
+        <div className="flex items-center gap-2 flex-wrap justify-center">
+          {BADGES.map(({ icon: Icon, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-1.5 bg-[#C9A84C]/10 border border-[#C9A84C]/20 text-[#C9A84C] text-[10px] font-semibold px-3 py-1.5 rounded-full">
+              <Icon size={12} />
+              <span>{label}</span>
+            </div>
           ))}
         </div>
       </div>
