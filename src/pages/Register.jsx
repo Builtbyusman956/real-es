@@ -1,11 +1,36 @@
+// src/pages/Register.jsx
 import { useState } from "react";
-import { Eye, EyeOff, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Mail, Home, ShieldCheck, Building2, MapPin } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import bgImg from "../assets/realestate.avif";
 
+// All 195 countries
 const COUNTRIES = [
-  "Nigeria", "Ghana", "Kenya", "South Africa",
-  "United Kingdom", "United States", "Canada", "Other",
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+  "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+  "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+  "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+  "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+  "Fiji", "Finland", "France",
+  "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+  "Haiti", "Honduras", "Hungary",
+  "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast",
+  "Jamaica", "Japan", "Jordan",
+  "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan",
+  "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+  "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+  "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway",
+  "Oman",
+  "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
+  "Qatar",
+  "Romania", "Russia", "Rwanda",
+  "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+  "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+  "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+  "Vanuatu", "Vatican City", "Venezuela", "Vietnam",
+  "Yemen",
+  "Zambia", "Zimbabwe"
 ];
 
 const INITIAL = {
@@ -44,31 +69,64 @@ const inputCls = (err) =>
    ${err ? "border-red-400 ring-1 ring-red-300" : "border-[#E0D9CF] hover:border-[#C9A84C]/50"}`;
 
 // ── Confirmation screen ───────────────────────────────────────────────────────
-const ConfirmScreen = ({ email }) => (
-  <div className="flex flex-col items-center text-center gap-4 py-10 px-6">
-    <div className="w-16 h-16 rounded-full bg-[#E8D5A3]/40 border border-[#C9A84C]/30 flex items-center justify-center text-[#C9A84C]">
-      <Mail size={30} />
+const ConfirmScreen = ({ email, role }) => {
+  const isAgent = role === "agent";
+  
+  return (
+    <div className="flex flex-col items-center text-center gap-4 py-10 px-6">
+      <div className="w-16 h-16 rounded-full bg-[#E8D5A3]/40 border border-[#C9A84C]/30 flex items-center justify-center text-[#C9A84C]">
+        <Mail size={30} />
+      </div>
+      <h3 className="text-xl font-bold text-[#0A1628]">Check your inbox</h3>
+      <p className="text-sm text-[#6B7280] max-w-xs leading-relaxed">
+        We sent a confirmation link to{" "}
+        <span className="font-semibold text-[#0A1628]">{email}</span>.
+        Click it to activate your {role} account and access your dashboard.
+      </p>
+      <p className="text-xs text-[#6B7280] mt-1">
+        Didn't get it? Check your spam folder or{" "}
+        <button className="text-[#C9A84C] underline font-medium">resend email</button>.
+      </p>
+      
+      {/* Role indicator with icon */}
+      <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#E8D5A3]/30 rounded-full">
+        {isAgent ? (
+          <>
+            <ShieldCheck size={16} className="text-[#C9A84C]" />
+            <span className="text-xs font-semibold text-[#0A1628]">Agent Account</span>
+          </>
+        ) : (
+          <>
+            <Home size={16} className="text-[#C9A84C]" />
+            <span className="text-xs font-semibold text-[#0A1628]">Buyer Account</span>
+          </>
+        )}
+      </div>
     </div>
-    <h3 className="text-xl font-bold text-[#0A1628]">Check your inbox</h3>
-    <p className="text-sm text-[#6B7280] max-w-xs leading-relaxed">
-      We sent a confirmation link to{" "}
-      <span className="font-semibold text-[#0A1628]">{email}</span>.
-      Click it to activate your account and access your dashboard.
-    </p>
-    <p className="text-xs text-[#6B7280] mt-1">
-      Didn't get it? Check your spam folder or{" "}
-      <button className="text-[#C9A84C] underline font-medium">resend email</button>.
-    </p>
-  </div>
-);
+  );
+};
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 const Register = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { signup, loginWithGoogle } = useAuth();
+  const role = searchParams.get("role") || "buyer";
+
   const [form, setForm]           = useState(INITIAL);
   const [errors, setErrors]       = useState({});
   const [showPw, setShowPw]       = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
+
+  const isAgent = role === "agent";
+  const portalTitle = isAgent ? "Agent Portal" : "Buyer Portal";
+  const accountType = isAgent ? "Agent" : "Buyer";
+  const submitText = isAgent ? "Create Agent Account" : "Create Buyer Account";
+  const postScript = isAgent 
+    ? "Agent ID & BVN verification happens inside your dashboard after sign-up."
+    : "Start browsing verified properties immediately after confirmation.";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -76,18 +134,52 @@ const Register = () => {
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate(form);
     if (Object.keys(errs).length) { setErrors(errs); return; }
-    console.log("Register:", form);
-    setSubmitted(true);
+
+    try {
+      setLoading(true);
+      setError("");
+      
+      const displayName = `${form.firstName} ${form.lastName}`;
+      await signup(form.email, form.password, displayName, role);
+      
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Registration error:", err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError("This email is already registered. Please sign in instead.");
+      } else if (err.code === 'auth/weak-password') {
+        setError("Password should be at least 6 characters.");
+      } else {
+        setError("Failed to create account. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      await loginWithGoogle(role);
+      // Redirect to dashboard after successful Google sign-up
+      navigate(isAgent ? "/dashboard/agent" : "/dashboard/buyer");
+    } catch (err) {
+      console.error("Google sign-up error:", err);
+      setError("Failed to sign up with Google. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center px-4 py-20">
 
-      {/* Background — matches Hero exactly */}
+      {/* Background */}
       <div className="absolute inset-0">
         <img src={bgImg} alt="background" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/65 to-[#0A1628]/20" />
@@ -96,12 +188,21 @@ const Register = () => {
       {/* Card */}
       <div className="relative z-10 w-full max-w-md bg-[#F7F4EF] rounded-3xl shadow-2xl shadow-[#0A1628]/40 overflow-hidden">
 
-        {/* Header */}
+        {/* Header - DYNAMIC BASED ON ROLE */}
         <div className="bg-[#0A1628] px-6 pt-6 pb-5">
-          <p className="text-[#C9A84C] text-[10px] font-semibold uppercase tracking-[0.18em] mb-1">
-            Agent Portal
-          </p>
-          <h2 className="text-[#F7F4EF] text-2xl font-bold leading-tight">Create Your Account</h2>
+          <div className="flex items-center gap-2 mb-1">
+            {isAgent ? (
+              <ShieldCheck size={14} className="text-[#C9A84C]" />
+            ) : (
+              <Home size={14} className="text-[#C9A84C]" />
+            )}
+            <p className="text-[#C9A84C] text-[10px] font-semibold uppercase tracking-[0.18em]">
+              {portalTitle}
+            </p>
+          </div>
+          <h2 className="text-[#F7F4EF] text-2xl font-bold leading-tight">
+            Create Your {accountType} Account
+          </h2>
           <p className="text-[#8A9BB5] text-sm mt-1">
             Already have an account?{" "}
             <button
@@ -113,22 +214,25 @@ const Register = () => {
           </p>
         </div>
 
-        {submitted ? <ConfirmScreen email={form.email} /> : (
+        {error && (
+          <div className="mx-6 mt-4 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+            {error}
+          </div>
+        )}
+
+        {submitted ? <ConfirmScreen email={form.email} role={role} /> : (
           <form onSubmit={handleSubmit} noValidate className="px-6 py-5 flex flex-col gap-4">
 
             {/* Social buttons */}
             <div className="flex flex-col gap-2">
-              <button type="button"
-                className="flex items-center justify-center gap-2 w-full border border-[#E0D9CF] bg-white rounded-xl py-2.5 text-sm font-medium text-[#0A1628] hover:border-[#C9A84C]/50 hover:bg-[#F7F4EF] active:scale-95 transition duration-200">
+              <button 
+                type="button"
+                onClick={handleGoogleSignUp}
+                disabled={loading}
+                className="flex items-center justify-center gap-2 w-full border border-[#E0D9CF] bg-white rounded-xl py-2.5 text-sm font-medium text-[#0A1628] hover:border-[#C9A84C]/50 hover:bg-[#F7F4EF] active:scale-95 transition duration-200 disabled:opacity-50"
+              >
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
                 Continue with Google
-              </button>
-              <button type="button"
-                className="flex items-center justify-center gap-2 w-full bg-[#0A1628] hover:bg-[#1A2E4A] active:scale-95 text-[#F7F4EF] rounded-xl py-2.5 text-sm font-medium transition duration-200">
-                <svg className="w-4 h-4 fill-[#F7F4EF]" viewBox="0 0 24 24">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                </svg>
-                Continue with Apple
               </button>
             </div>
 
@@ -173,12 +277,16 @@ const Register = () => {
               </div>
             </Field>
 
+            {/* Country dropdown - ALL COUNTRIES */}
             <Field label="Country" error={errors.country}>
-              <select name="country" value={form.country} onChange={handleChange}
-                className={inputCls(errors.country)}>
-                <option value="">— Select country —</option>
-                {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <div className="relative">
+                <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+                <select name="country" value={form.country} onChange={handleChange}
+                  className={inputCls(errors.country) + " pl-10"}>
+                  <option value="">— Select country —</option>
+                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </Field>
 
             {/* Checkboxes */}
@@ -206,14 +314,22 @@ const Register = () => {
               <FieldError msg={errors.agreed} />
             </div>
 
-            {/* Submit */}
-            <button type="submit"
-              className="w-full bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-3 rounded-xl text-sm font-bold transition duration-200 mt-1">
-              Create Account
+            {/* Submit button - DYNAMIC TEXT */}
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-3 rounded-xl text-sm font-bold transition duration-200 mt-1 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-[#0A1628] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                isAgent ? <Building2 size={16} /> : <Home size={16} />
+              )}
+              {submitText}
             </button>
 
             <p className="text-center text-xs text-[#6B7280]">
-              Agent ID & BVN verification happens inside your dashboard after sign-up.
+              {postScript}
             </p>
 
           </form>

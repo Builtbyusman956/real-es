@@ -11,9 +11,6 @@ import {
   RiShareLine,
   RiCloseLine,
   RiHome4Line,
-  RiVerifiedBadgeLine,
-  RiFilter3Line,
-  RiTimeLine,
 } from "react-icons/ri";
 import {
   MdOutlineBathtub,
@@ -100,9 +97,15 @@ const STATES = ["All States", "Lagos", "Abuja", "Oyo", "Enugu", "Rivers"];
 const TYPES  = ["All Types", "Rent", "Sale", "Land"];
 const SORT   = ["Newest", "Price: Low to High", "Price: High to Low", "Most Saved"];
 
+const INITIAL = {
+  search: "", type: "All Types", state: "All States",
+  sort: "Newest", maxPrice: 250000000,
+  verifiedOnly: false, lowRiskOnly: false,
+};
+
 // ─── Post Card ────────────────────────────────────────────────────────────────
 const PostCard = ({ post, saved, onSave }) => {
-  const navigate    = useNavigate();
+  const navigate  = useNavigate();
   const [imgIndex, setImgIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
 
@@ -135,7 +138,7 @@ const PostCard = ({ post, saved, onSave }) => {
           </span>
           {post.verified && (
             <span className="bg-[#E8D5A3] text-[#0A1628] text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-              <RiVerifiedBadgeLine size={10} /> Verified
+              <RiShieldCheckFill size={10} /> Verified
             </span>
           )}
         </div>
@@ -172,14 +175,13 @@ const PostCard = ({ post, saved, onSave }) => {
           <RiMapPinLine size={11} /> {post.location}, {post.state}
         </p>
 
-        {/* Stats row */}
         {post.beds && (
           <div className="flex gap-4 mb-2">
             <span className="text-xs text-[#6B7280] flex items-center gap-1">
-              <RiBedLine size={12} /> {post.beds} Beds
+              <MdBedroomParent size={13} /> {post.beds} Beds
             </span>
             <span className="text-xs text-[#6B7280] flex items-center gap-1">
-              <MdOutlineBathtub size={12} /> {post.baths} Baths
+              <MdOutlineBathtub size={13} /> {post.baths} Baths
             </span>
             <span className="text-xs text-[#6B7280] flex items-center gap-1">
               <RiHome4Line size={12} /> {post.size}
@@ -194,7 +196,6 @@ const PostCard = ({ post, saved, onSave }) => {
           </div>
         )}
 
-        {/* Description */}
         <p className={`text-sm text-[#6B7280] leading-relaxed ${expanded ? "" : "line-clamp-2"}`}>
           {post.description}
         </p>
@@ -205,37 +206,29 @@ const PostCard = ({ post, saved, onSave }) => {
           </button>
         )}
 
-        {/* Price */}
         <p className="text-[#0A1628] font-bold text-lg mt-3">{post.price}</p>
       </div>
 
       {/* Action bar */}
       <div className="flex items-center justify-between px-4 py-3 border-t border-[#E0D9CF]">
         <div className="flex items-center gap-1">
-          {/* Save */}
           <button onClick={() => onSave(post.id)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-sm font-medium text-[#6B7280] hover:text-[#0A1628]">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
             {saved
               ? <RiHeart3Fill size={17} className="text-red-500" />
               : <RiHeart3Line size={17} />}
             <span className="text-xs">{post.saves + (saved ? 1 : 0)}</span>
           </button>
-
-          {/* Message */}
           <button onClick={() => navigate("/dashboard/buyer/messages")}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-sm font-medium text-[#6B7280] hover:text-[#0A1628]">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
             <RiMessage3Line size={17} />
             <span className="text-xs">Message</span>
           </button>
-
-          {/* Share */}
-          <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-sm font-medium text-[#6B7280] hover:text-[#0A1628]">
+          <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
             <RiShareLine size={17} />
             <span className="text-xs hidden sm:block">Share</span>
           </button>
         </div>
-
-        {/* View full listing */}
         <button onClick={() => navigate(`/property/${post.id}`)}
           className="bg-[#0A1628] hover:bg-[#1A2E4A] active:scale-95 text-[#C9A84C] text-xs font-bold px-4 py-2 rounded-xl transition duration-200">
           View Listing
@@ -247,15 +240,14 @@ const PostCard = ({ post, saved, onSave }) => {
 
 // ─── Filter Bar ───────────────────────────────────────────────────────────────
 const FilterBar = ({ filters, setFilters, total, showFilters, setShowFilters }) => (
-  <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3 overflow-x-auto scrollbar-hide">
+  <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3 overflow-x-auto">
     <button onClick={() => setShowFilters((v) => !v)}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
         ${showFilters
           ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
           : "bg-white text-[#0A1628] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
-      <RiSlidersLine size={13} /> Filters
+      <MdTune size={13} /> Filters
     </button>
-
     {TYPES.map((t) => (
       <button key={t} onClick={() => setFilters((p) => ({ ...p, type: t }))}
         className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
@@ -265,9 +257,7 @@ const FilterBar = ({ filters, setFilters, total, showFilters, setShowFilters }) 
         {t}
       </button>
     ))}
-
     <div className="h-4 w-px bg-[#E0D9CF] flex-shrink-0" />
-
     {STATES.map((s) => (
       <button key={s} onClick={() => setFilters((p) => ({ ...p, state: s }))}
         className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
@@ -277,24 +267,22 @@ const FilterBar = ({ filters, setFilters, total, showFilters, setShowFilters }) 
         {s}
       </button>
     ))}
-
     <div className="ml-auto flex-shrink-0 text-xs text-[#6B7280] font-medium whitespace-nowrap">
       {total} posts
     </div>
   </div>
 );
 
-// ─── Advanced Filter Panel ────────────────────────────────────────────────────
+// ─── Advanced Filters ─────────────────────────────────────────────────────────
 const AdvancedFilters = ({ filters, setFilters, onClose }) => (
   <div className="bg-[#F7F4EF] border-b border-[#E0D9CF] px-4 py-4">
     <div className="flex items-center justify-between mb-4">
       <p className="text-sm font-bold text-[#0A1628]">Advanced Filters</p>
-      <button onClick={onClose} className="text-[#6B7280] hover:text-[#0A1628]">
-        <RiCloseLine size={18} />
+      <button onClick={onClose}>
+        <RiCloseLine size={18} className="text-[#6B7280]" />
       </button>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {/* Sort */}
       <div>
         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Sort By</p>
         <div className="flex flex-col gap-1.5">
@@ -309,8 +297,6 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
           ))}
         </div>
       </div>
-
-      {/* Price range */}
       <div>
         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">
           Max Price — ₦{filters.maxPrice.toLocaleString()}
@@ -320,11 +306,9 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
           onChange={(e) => setFilters((p) => ({ ...p, maxPrice: Number(e.target.value) }))}
           className="w-full accent-[#C9A84C]" />
       </div>
-
-      {/* Verified only */}
       <div>
         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Listing Quality</p>
-        <label className="flex items-center gap-2.5 cursor-pointer">
+        <label className="flex items-center gap-2.5 cursor-pointer mb-3">
           <div onClick={() => setFilters((p) => ({ ...p, verifiedOnly: !p.verifiedOnly }))}
             className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5
               ${filters.verifiedOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
@@ -333,7 +317,7 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
           </div>
           <span className="text-sm font-medium text-[#0A1628]">Verified only</span>
         </label>
-        <label className="flex items-center gap-2.5 cursor-pointer mt-3">
+        <label className="flex items-center gap-2.5 cursor-pointer">
           <div onClick={() => setFilters((p) => ({ ...p, lowRiskOnly: !p.lowRiskOnly }))}
             className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5
               ${filters.lowRiskOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
@@ -348,12 +332,6 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
 );
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-const INITIAL = {
-  search: "", type: "All Types", state: "All States",
-  sort: "Newest", maxPrice: 250000000,
-  verifiedOnly: false, lowRiskOnly: false,
-};
-
 const BuyerFeed = () => {
   const [filters,     setFilters]     = useState(INITIAL);
   const [saved,       setSaved]       = useState({});
@@ -372,18 +350,18 @@ const BuyerFeed = () => {
     if (filters.verifiedOnly)           list = list.filter((p) => p.verified);
     if (filters.lowRiskOnly)            list = list.filter((p) => p.risk === "Low Risk");
     list = list.filter((p) => p.priceRaw <= filters.maxPrice);
-    if (filters.sort === "Price: Low to High")  list = [...list].sort((a, b) => a.priceRaw - b.priceRaw);
-    if (filters.sort === "Price: High to Low")  list = [...list].sort((a, b) => b.priceRaw - a.priceRaw);
-    if (filters.sort === "Most Saved")           list = [...list].sort((a, b) => b.saves - a.saves);
+    if (filters.sort === "Price: Low to High") list = [...list].sort((a, b) => a.priceRaw - b.priceRaw);
+    if (filters.sort === "Price: High to Low") list = [...list].sort((a, b) => b.priceRaw - a.priceRaw);
+    if (filters.sort === "Most Saved")          list = [...list].sort((a, b) => b.saves - a.saves);
     return list;
   }, [filters]);
 
   return (
     <div className="min-h-screen bg-[#F7F4EF]">
 
-      {/* Search header */}
-      <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-2 bg-[#F7F4EF] rounded-xl px-3 py-2 border border-[#E0D9CF] focus-within:border-[#C9A84C] transition">
+      {/* Search */}
+      <div className="bg-white border-b border-[#E0D9CF] px-4 py-3">
+        <div className="flex items-center gap-2 bg-[#F7F4EF] rounded-xl px-3 py-2 border border-[#E0D9CF] focus-within:border-[#C9A84C] transition">
           <RiSearchLine size={16} className="text-[#6B7280] flex-shrink-0" />
           <input type="text" placeholder="Search listings..."
             value={filters.search}

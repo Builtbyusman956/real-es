@@ -1,6 +1,8 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home            from "./pages/Home";
 import Browse          from "./pages/Browse";
@@ -11,29 +13,89 @@ import BuyerDashboard  from "./pages/dashboard/BuyerDashboard";
 import PropertyDetails from "./pages/PropertyDetails";
 import About           from "./pages/About";
 import Contact         from "./pages/Contact";
-import BuyerFeed from "./pages/dashboard/BuyerFeed";
-import AgentFeed from "./pages/dashboard/AgentFeed";
+import BuyerFeed       from "./pages/dashboard/BuyerFeed";
+import AgentFeed       from "./pages/dashboard/AgentFeed";
 
+// Component to handle role-based redirects after login
+const RoleBasedRedirect = () => {
+  const { user, userRole } = useAuth();
+  
+  if (!user) return <Navigate to="/login" replace />;
+  
+  if (userRole === 'agent') {
+    return <Navigate to="/dashboard/agent" replace />;
+  }
+  
+  return <Navigate to="/dashboard/buyer" replace />;
+};
 
 function App() {
+  const { user, userRole } = useAuth();
+
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
+        {/* Public routes */}
         <Route path="/"                element={<Home />} />
         <Route path="/browse"          element={<Browse />} />
-        <Route path="/register"        element={<Register />} />
-        <Route path="/login"           element={<Login />} />
-        <Route path="/dashboard/agent" element={<AgentDashboard />} />
-        <Route path="/dashboard/buyer" element={<BuyerDashboard />} />
-        <Route path="/property/:id"    element={<PropertyDetails />} />
         <Route path="/about"           element={<About />} />
         <Route path="/contact"         element={<Contact />} />
-        <Route path="/dashboard/buyer/feed"  element={<BuyerFeed />} />
-        <Route path="/dashboard/agent/feed"  element={<AgentFeed />} />
+        <Route path="/property/:id"    element={<PropertyDetails />} />
+        
+        {/* Auth routes - redirect to dashboard if already logged in */}
+        <Route 
+          path="/login" 
+          element={user ? <RoleBasedRedirect /> : <Login />} 
+        />
+        <Route 
+          path="/register" 
+          element={user ? <RoleBasedRedirect /> : <Register />} 
+        />
 
+        {/* Protected Buyer Routes */}
+        <Route 
+          path="/dashboard/buyer/*" 
+          element={
+            <ProtectedRoute allowedRoles={['buyer']}>
+              <BuyerDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/buyer/feed" 
+          element={
+            <ProtectedRoute allowedRoles={['buyer']}>
+              <BuyerFeed />
+            </ProtectedRoute>
+          } 
+        />
 
+        {/* Protected Agent Routes */}
+        <Route 
+          path="/dashboard/agent/*" 
+          element={
+            <ProtectedRoute allowedRoles={['agent']}>
+              <AgentDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/agent/feed" 
+          element={
+            <ProtectedRoute allowedRoles={['agent']}>
+              <AgentFeed />
+            </ProtectedRoute>
+          } 
+        />
 
+        {/* Root dashboard redirect */}
+        <Route 
+          path="/dashboard" 
+          element={<RoleBasedRedirect />} 
+        />
+
+        {/* 404 Fallback */}
         <Route path="*" element={
           <div className="h-screen flex items-center justify-center">
             <div className="text-center">
