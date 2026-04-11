@@ -88,10 +88,9 @@ const CredentialsStep = ({ role, onNext }) => {
       await login(form.email, form.password);
 
       if (role === "agent") {
-        onNext(); // ✅ agents → OTP step
-      } else {
-        setTimeout(() => navigate("/dashboard/buyer"), 1500); // ✅ delay for Firestore role fetch
+        onNext(); // agents → OTP step
       }
+      // ✅ buyers: no manual navigate — App.jsx /login route redirects via RoleBasedRedirect
     } catch (err) {
       console.error("Login error:", err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
@@ -113,10 +112,9 @@ const CredentialsStep = ({ role, onNext }) => {
       await loginWithGoogle(role);
 
       if (role === "agent") {
-        onNext(); // ✅ agents → OTP step
-      } else {
-        setTimeout(() => navigate("/dashboard/buyer"), 1500); // ✅ delay for Firestore role fetch
+        onNext(); // agents → OTP step
       }
+      // ✅ buyers: App.jsx /login route redirects via RoleBasedRedirect
     } catch (err) {
       console.error("Google login error:", err);
       setError("Failed to sign in with Google. Please try again.");

@@ -16,13 +16,13 @@ import Contact         from "./pages/Contact";
 import BuyerFeed       from "./pages/dashboard/BuyerFeed";
 import AgentFeed       from "./pages/dashboard/AgentFeed";
 
-// ✅ Waits for role to load before redirecting — prevents agents landing on buyer dashboard
 const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
   if (roleLoading) return null; // ⏳ wait for Firestore role fetch
 
+  // ✅ Default to buyer if role is null (shouldn't happen but safe fallback)
   if (userRole === 'agent') return <Navigate to="/dashboard/agent" replace />;
   return <Navigate to="/dashboard/buyer" replace />;
 };
