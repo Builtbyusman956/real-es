@@ -90,7 +90,7 @@ const CredentialsStep = ({ role, onNext }) => {
       if (role === "agent") {
         onNext(); // ✅ agents → OTP step
       } else {
-        navigate("/dashboard/buyer"); // ✅ buyers → dashboard directly
+        setTimeout(() => navigate("/dashboard/buyer"), 500); // ✅ delay for Firestore role fetch
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -115,7 +115,7 @@ const CredentialsStep = ({ role, onNext }) => {
       if (role === "agent") {
         onNext(); // ✅ agents → OTP step
       } else {
-        navigate("/dashboard/buyer"); // ✅ buyers → dashboard directly
+        setTimeout(() => navigate("/dashboard/buyer"), 500); // ✅ delay for Firestore role fetch
       }
     } catch (err) {
       console.error("Google login error:", err);

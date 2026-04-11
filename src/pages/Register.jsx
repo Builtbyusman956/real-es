@@ -107,8 +107,8 @@ const Register = () => {
       const displayName = `${form.firstName} ${form.lastName}`;
       await signup(form.email, form.password, displayName, role);
 
-      // ✅ Redirect straight to dashboard after signup
-      navigate(isAgent ? "/dashboard/agent" : "/dashboard/buyer");
+      // ✅ Delay to let onAuthStateChanged + Firestore role resolve
+      setTimeout(() => navigate(isAgent ? "/dashboard/agent" : "/dashboard/buyer"), 500);
     } catch (err) {
       console.error("Registration error:", err);
       if (err.code === 'auth/email-already-in-use') {
