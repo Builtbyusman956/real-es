@@ -3,18 +3,8 @@ import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { 
-  Eye, 
-  EyeOff, 
-  ShieldCheck, 
-  Home, 
-  ArrowRight, 
-  RotateCcw, 
-  Smartphone,
-  User,
-  Lock,
-  CheckCircle2,
-  Camera,
-  Mail
+  Eye, EyeOff, ShieldCheck, Home, ArrowRight, RotateCcw,
+  Smartphone, User, Lock, CheckCircle2, Camera
 } from "lucide-react";
 import bgImg from "../assets/realestate.avif";
 
@@ -74,11 +64,11 @@ const RoleStep = ({ onSelect }) => (
 const CredentialsStep = ({ role, onNext }) => {
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm]     = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({});
-  const [showPw, setShowPw] = useState(false);
+  const [form, setForm]       = useState({ email: "", password: "" });
+  const [errors, setErrors]   = useState({});
+  const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState("");
+  const [error, setError]     = useState("");
 
   const validate = () => {
     const e = {};
@@ -96,20 +86,15 @@ const CredentialsStep = ({ role, onNext }) => {
       setLoading(true);
       setError("");
       await login(form.email, form.password);
-      
-      // Store role and redirect
-      localStorage.setItem('userRole', role);
-      
-      // Redirect based on role
+
       if (role === "agent") {
-        onNext(); // Go to OTP step for agents
+        onNext(); // ✅ agents → OTP step
       } else {
-        // Buyers go directly to dashboard
-        navigate("/dashboard/buyer");
+        navigate("/dashboard/buyer"); // ✅ buyers → dashboard directly
       }
     } catch (err) {
       console.error("Login error:", err);
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError("Invalid email or password.");
       } else if (err.code === 'auth/too-many-requests') {
         setError("Too many failed attempts. Please try again later.");
@@ -126,12 +111,11 @@ const CredentialsStep = ({ role, onNext }) => {
       setLoading(true);
       setError("");
       await loginWithGoogle(role);
-      
-      // Redirect based on role
+
       if (role === "agent") {
-        onNext(); // Go to OTP step for agents
+        onNext(); // ✅ agents → OTP step
       } else {
-        navigate("/dashboard/buyer");
+        navigate("/dashboard/buyer"); // ✅ buyers → dashboard directly
       }
     } catch (err) {
       console.error("Google login error:", err);
@@ -147,15 +131,7 @@ const CredentialsStep = ({ role, onNext }) => {
       {/* Role pill */}
       <div className="flex justify-center">
         <span className="bg-[#E8D5A3] text-[#0A1628] text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide flex items-center gap-1">
-          {role === "agent" ? (
-            <>
-              <ShieldCheck size={12} /> Agent Login
-            </>
-          ) : (
-            <>
-              <Home size={12} /> Buyer Login
-            </>
-          )}
+          {role === "agent" ? <><ShieldCheck size={12} /> Agent Login</> : <><Home size={12} /> Buyer Login</>}
         </span>
       </div>
 
@@ -166,7 +142,7 @@ const CredentialsStep = ({ role, onNext }) => {
       )}
 
       {/* Google Sign In */}
-      <button 
+      <button
         type="button"
         onClick={handleGoogleLogin}
         disabled={loading}
@@ -215,7 +191,7 @@ const CredentialsStep = ({ role, onNext }) => {
         <FieldError msg={errors.password} />
       </div>
 
-      <button 
+      <button
         type="submit"
         disabled={loading}
         className="w-full bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-3 rounded-xl text-sm font-bold transition duration-200 mt-1 flex items-center justify-center gap-2 disabled:opacity-50"
@@ -231,12 +207,12 @@ const CredentialsStep = ({ role, onNext }) => {
   );
 };
 
-// ─── Step 3 — OTP ─────────────────────────────────────────────────────────────
+// ─── Step 3 — OTP (agents only) ───────────────────────────────────────────────
 const OTPStep = ({ role, onNext }) => {
   const navigate = useNavigate();
-  const [otp, setOtp]       = useState(["", "", "", "", "", ""]);
-  const [error, setError]   = useState("");
-  const [resent, setResent] = useState(false);
+  const [otp, setOtp]         = useState(["", "", "", "", "", ""]);
+  const [error, setError]     = useState("");
+  const [resent, setResent]   = useState(false);
   const [loading, setLoading] = useState(false);
   const inputs = useRef([]);
 
@@ -264,13 +240,12 @@ const OTPStep = ({ role, onNext }) => {
     e.preventDefault();
     const code = otp.join("");
     if (code.length < 6) { setError("Enter the 6-digit code sent to your phone."); return; }
-    
-    // For demo, just proceed. In production, verify OTP with backend
+
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
       if (role === "agent") {
-        onNext(); // Go to face verification
+        onNext(); // → face verification
       } else {
         navigate("/dashboard/buyer");
       }
@@ -293,7 +268,6 @@ const OTPStep = ({ role, onNext }) => {
         </p>
       </div>
 
-      {/* OTP boxes */}
       <div className="flex gap-2 justify-center" onPaste={handlePaste}>
         {otp.map((digit, i) => (
           <input
@@ -311,7 +285,7 @@ const OTPStep = ({ role, onNext }) => {
 
       {error && <p className="text-xs text-red-400 text-center">{error}</p>}
 
-      <button 
+      <button
         type="submit"
         disabled={loading}
         className="w-full bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-3 rounded-xl text-sm font-bold transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
@@ -343,13 +317,13 @@ const OTPStep = ({ role, onNext }) => {
 // ─── Step 4 — Face capture (agents only) ─────────────────────────────────────
 const FaceStep = () => {
   const navigate = useNavigate();
-  const videoRef    = useRef(null);
-  const canvasRef   = useRef(null);
-  const [streaming, setStreaming]   = useState(false);
-  const [captured,  setCaptured]    = useState(false);
-  const [imgSrc,    setImgSrc]      = useState(null);
-  const [error,     setError]       = useState("");
-  const [loading, setLoading] = useState(false);
+  const videoRef  = useRef(null);
+  const canvasRef = useRef(null);
+  const [streaming, setStreaming] = useState(false);
+  const [captured, setCaptured]   = useState(false);
+  const [imgSrc, setImgSrc]       = useState(null);
+  const [error, setError]         = useState("");
+  const [loading, setLoading]     = useState(false);
 
   const startCamera = useCallback(async () => {
     setError("");
@@ -384,7 +358,6 @@ const FaceStep = () => {
 
   const handleConfirm = () => {
     setLoading(true);
-    // Simulate face verification
     setTimeout(() => {
       setLoading(false);
       navigate("/dashboard/agent");
@@ -402,7 +375,6 @@ const FaceStep = () => {
         </p>
       </div>
 
-      {/* Camera / preview area */}
       <div className="relative rounded-2xl overflow-hidden bg-[#0A1628] aspect-video flex items-center justify-center">
         {captured ? (
           <img src={imgSrc} alt="Captured face" className="w-full h-full object-cover" />
@@ -419,7 +391,6 @@ const FaceStep = () => {
             )}
           </>
         )}
-        {/* Face guide overlay */}
         {streaming && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-36 h-44 rounded-full border-2 border-[#C9A84C]/60 border-dashed" />
@@ -449,7 +420,7 @@ const FaceStep = () => {
               className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#E0D9CF] text-sm font-medium text-[#6B7280] hover:border-[#C9A84C]/50 hover:text-[#0A1628] transition duration-200">
               <RotateCcw size={14} /> Retake
             </button>
-            <button 
+            <button
               onClick={handleConfirm}
               disabled={loading}
               className="flex-1 bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-2.5 rounded-xl text-sm font-bold transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
@@ -468,41 +439,33 @@ const FaceStep = () => {
   );
 };
 
-// ─── Progress bar ─────────────────────────────────────────────────────────────
-const stepIndex  = (step, role) => {
+// ─── Progress helpers ─────────────────────────────────────────────────────────
+const stepIndex = (step, role) => {
   const steps = role === "agent"
     ? [STEPS.ROLE, STEPS.CREDS, STEPS.OTP, STEPS.FACE]
-    : [STEPS.ROLE, STEPS.CREDS, STEPS.OTP];
+    : [STEPS.ROLE, STEPS.CREDS];
   return steps.indexOf(step);
 };
 
-const totalSteps = (role) => role === "agent" ? 4 : 3;
+const totalSteps = (role) => role === "agent" ? 4 : 2;
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const Login = () => {
-  const navigate          = useNavigate();
-  const [step, setStep]   = useState(STEPS.ROLE);
-  const [role, setRole]   = useState(null);
+  const [step, setStep] = useState(STEPS.ROLE);
+  const [role, setRole] = useState(null);
 
-  const handleRoleSelect = (r) => { 
-    setRole(r); 
-    setStep(STEPS.CREDS); 
-  };
-  
+  const handleRoleSelect = (r) => { setRole(r); setStep(STEPS.CREDS); };
   const handleCredsNext  = ()  => setStep(STEPS.OTP);
-  
-  const handleOTPNext    = ()  => {
-    if (role === "agent") setStep(STEPS.FACE);
-  };
+  const handleOTPNext    = ()  => { if (role === "agent") setStep(STEPS.FACE); };
 
   const HEADERS = {
-    [STEPS.ROLE]:  { label: "Welcome Back",        sub: "How would you like to sign in?" },
-    [STEPS.CREDS]: { label: "Enter Your Details",  sub: "Sign in to your NRET account" },
-    [STEPS.OTP]:   { label: "Verify Your Phone",   sub: "Security check — enter your OTP" },
-    [STEPS.FACE]:  { label: "Face Verification",   sub: "Final security step for agents" },
+    [STEPS.ROLE]:  { label: "Welcome Back",       sub: "How would you like to sign in?" },
+    [STEPS.CREDS]: { label: "Enter Your Details", sub: "Sign in to your NRET account" },
+    [STEPS.OTP]:   { label: "Verify Your Phone",  sub: "Security check — enter your OTP" },
+    [STEPS.FACE]:  { label: "Face Verification",  sub: "Final security step for agents" },
   };
 
-  const current = HEADERS[step];
+  const current  = HEADERS[step];
   const progress = role
     ? Math.round(((stepIndex(step, role) + 1) / totalSteps(role)) * 100)
     : 0;
@@ -510,22 +473,18 @@ const Login = () => {
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center px-4 py-20">
 
-      {/* Background */}
       <div className="absolute inset-0">
         <img src={bgImg} alt="background" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/65 to-[#0A1628]/20" />
       </div>
 
-      {/* Card */}
       <div className="relative z-10 w-full max-w-md bg-[#F7F4EF] rounded-3xl shadow-2xl shadow-[#0A1628]/40 overflow-hidden">
 
-        {/* Header */}
         <div className="bg-[#0A1628] px-6 pt-6 pb-5">
           <p className="text-[#C9A84C] text-[10px] font-semibold uppercase tracking-[0.18em] mb-1">NRET Platform</p>
           <h2 className="text-[#F7F4EF] text-2xl font-bold leading-tight">{current.label}</h2>
           <p className="text-[#8A9BB5] text-sm mt-1">{current.sub}</p>
 
-          {/* Progress bar */}
           {role && (
             <div className="mt-4 bg-[#1A2E4A] rounded-full h-1">
               <div
@@ -536,13 +495,11 @@ const Login = () => {
           )}
         </div>
 
-        {/* Step content */}
-        {step === STEPS.ROLE  && <RoleStep       onSelect={handleRoleSelect} />}
+        {step === STEPS.ROLE  && <RoleStep        onSelect={handleRoleSelect} />}
         {step === STEPS.CREDS && <CredentialsStep role={role} onNext={handleCredsNext} />}
         {step === STEPS.OTP   && <OTPStep         role={role} onNext={handleOTPNext} />}
         {step === STEPS.FACE  && <FaceStep />}
 
-        {/* Footer */}
         <div className="px-6 pb-5 pt-1 text-center">
           <p className="text-xs text-[#6B7280]">
             Don't have an account?{" "}

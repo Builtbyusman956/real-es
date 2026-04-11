@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { 
   createUserWithEmailAndPassword, 
@@ -17,9 +18,10 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState(null);
+  const [user, setUser]           = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [userRole, setUserRole]   = useState(null);
+  const [roleLoading, setRoleLoading] = useState(true); // ✅ NEW
 
   // 🔹 SIGN UP (Email/Password)
   const signup = async (email, password, displayName, role = 'buyer') => {
@@ -66,7 +68,6 @@ export const AuthProvider = ({ children }) => {
         role,
         createdAt: new Date()
       });
-
       setUserRole(role);
     } else {
       // ✅ Existing user → use saved role
@@ -83,13 +84,13 @@ export const AuthProvider = ({ children }) => {
     return signOut(auth);
   };
 
-  // 🔹 AUTH STATE LISTENER (IMPORTANT)
+  // 🔹 AUTH STATE LISTENER
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
 
       if (user) {
-        const docRef = doc(db, "users", user.uid);
+        const docRef  = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -100,6 +101,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       setLoading(false);
+      setRoleLoading(false); // ✅ role is now resolved
     });
 
     return unsubscribe;
@@ -108,6 +110,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     userRole,
+    roleLoading, // ✅ exported
     signup,
     login,
     logout,
