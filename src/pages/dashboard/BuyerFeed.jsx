@@ -2,21 +2,9 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  RiShieldCheckFill,
-  RiMapPinLine,
-  RiSearchLine,
-  RiHeart3Line,
-  RiHeart3Fill,
-  RiMessage3Line,
-  RiShareLine,
-  RiCloseLine,
-  RiHome4Line,
-} from "react-icons/ri";
-import {
-  MdOutlineBathtub,
-  MdBedroomParent,
-  MdTune,
-} from "react-icons/md";
+  ShieldCheck, MapPin, Search, Heart, MessageCircle,
+  Share2, X, Home, Bed, Bath, SlidersHorizontal
+} from "lucide-react";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const AGENT_POSTS = [
@@ -105,7 +93,7 @@ const INITIAL = {
 
 // ─── Post Card ────────────────────────────────────────────────────────────────
 const PostCard = ({ post, saved, onSave }) => {
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const [imgIndex, setImgIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
 
@@ -121,9 +109,7 @@ const PostCard = ({ post, saved, onSave }) => {
           <div>
             <div className="flex items-center gap-1.5">
               <p className="text-sm font-bold text-[#0A1628]">{post.agent}</p>
-              {post.agentVerified && (
-                <RiShieldCheckFill size={13} className="text-[#C9A84C]" />
-              )}
+              {post.agentVerified && <ShieldCheck size={13} className="text-[#C9A84C]" />}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[10px] text-[#6B7280]">⭐ {post.agentRating}</span>
@@ -138,7 +124,7 @@ const PostCard = ({ post, saved, onSave }) => {
           </span>
           {post.verified && (
             <span className="bg-[#E8D5A3] text-[#0A1628] text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-              <RiShieldCheckFill size={10} /> Verified
+              <ShieldCheck size={10} /> Verified
             </span>
           )}
         </div>
@@ -146,24 +132,17 @@ const PostCard = ({ post, saved, onSave }) => {
 
       {/* Image */}
       <div className="relative">
-        <img
-          src={post.images[imgIndex]}
-          alt={post.title}
-          className="w-full h-56 sm:h-64 object-cover"
-        />
+        <img src={post.images[imgIndex]} alt={post.title} className="w-full h-56 sm:h-64 object-cover" />
         {post.images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
             {post.images.map((_, i) => (
               <button key={i} onClick={() => setImgIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition ${i === imgIndex ? "bg-white" : "bg-white/50"}`}
-              />
+                className={`w-1.5 h-1.5 rounded-full transition ${i === imgIndex ? "bg-white" : "bg-white/50"}`} />
             ))}
           </div>
         )}
         <div className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full
-          ${post.risk === "Low Risk"
-            ? "bg-[#0A1628] text-[#C9A84C]"
-            : "bg-yellow-100 text-yellow-700"}`}>
+          ${post.risk === "Low Risk" ? "bg-[#0A1628] text-[#C9A84C]" : "bg-yellow-100 text-yellow-700"}`}>
           {post.risk}
         </div>
       </div>
@@ -172,27 +151,19 @@ const PostCard = ({ post, saved, onSave }) => {
       <div className="px-4 pt-3 pb-2">
         <h3 className="font-bold text-[#0A1628] text-base mb-1">{post.title}</h3>
         <p className="text-xs text-[#6B7280] flex items-center gap-1 mb-2">
-          <RiMapPinLine size={11} /> {post.location}, {post.state}
+          <MapPin size={11} /> {post.location}, {post.state}
         </p>
 
         {post.beds && (
           <div className="flex gap-4 mb-2">
-            <span className="text-xs text-[#6B7280] flex items-center gap-1">
-              <MdBedroomParent size={13} /> {post.beds} Beds
-            </span>
-            <span className="text-xs text-[#6B7280] flex items-center gap-1">
-              <MdOutlineBathtub size={13} /> {post.baths} Baths
-            </span>
-            <span className="text-xs text-[#6B7280] flex items-center gap-1">
-              <RiHome4Line size={12} /> {post.size}
-            </span>
+            <span className="text-xs text-[#6B7280] flex items-center gap-1"><Bed size={13} /> {post.beds} Beds</span>
+            <span className="text-xs text-[#6B7280] flex items-center gap-1"><Bath size={13} /> {post.baths} Baths</span>
+            <span className="text-xs text-[#6B7280] flex items-center gap-1"><Home size={12} /> {post.size}</span>
           </div>
         )}
         {!post.beds && (
           <div className="flex gap-4 mb-2">
-            <span className="text-xs text-[#6B7280] flex items-center gap-1">
-              <RiHome4Line size={12} /> {post.size}
-            </span>
+            <span className="text-xs text-[#6B7280] flex items-center gap-1"><Home size={12} /> {post.size}</span>
           </div>
         )}
 
@@ -214,18 +185,16 @@ const PostCard = ({ post, saved, onSave }) => {
         <div className="flex items-center gap-1">
           <button onClick={() => onSave(post.id)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
-            {saved
-              ? <RiHeart3Fill size={17} className="text-red-500" />
-              : <RiHeart3Line size={17} />}
+            <Heart size={17} className={saved ? "fill-red-500 text-red-500" : ""} />
             <span className="text-xs">{post.saves + (saved ? 1 : 0)}</span>
           </button>
           <button onClick={() => navigate("/dashboard/buyer/messages")}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
-            <RiMessage3Line size={17} />
+            <MessageCircle size={17} />
             <span className="text-xs">Message</span>
           </button>
           <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
-            <RiShareLine size={17} />
+            <Share2 size={17} />
             <span className="text-xs hidden sm:block">Share</span>
           </button>
         </div>
@@ -243,17 +212,13 @@ const FilterBar = ({ filters, setFilters, total, showFilters, setShowFilters }) 
   <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3 overflow-x-auto">
     <button onClick={() => setShowFilters((v) => !v)}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
-        ${showFilters
-          ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-          : "bg-white text-[#0A1628] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
-      <MdTune size={13} /> Filters
+        ${showFilters ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#0A1628] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+      <SlidersHorizontal size={13} /> Filters
     </button>
     {TYPES.map((t) => (
       <button key={t} onClick={() => setFilters((p) => ({ ...p, type: t }))}
         className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
-          ${filters.type === t
-            ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-            : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+          ${filters.type === t ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
         {t}
       </button>
     ))}
@@ -261,9 +226,7 @@ const FilterBar = ({ filters, setFilters, total, showFilters, setShowFilters }) 
     {STATES.map((s) => (
       <button key={s} onClick={() => setFilters((p) => ({ ...p, state: s }))}
         className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
-          ${filters.state === s
-            ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-            : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+          ${filters.state === s ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
         {s}
       </button>
     ))}
@@ -278,9 +241,7 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
   <div className="bg-[#F7F4EF] border-b border-[#E0D9CF] px-4 py-4">
     <div className="flex items-center justify-between mb-4">
       <p className="text-sm font-bold text-[#0A1628]">Advanced Filters</p>
-      <button onClick={onClose}>
-        <RiCloseLine size={18} className="text-[#6B7280]" />
-      </button>
+      <button onClick={onClose}><X size={18} className="text-[#6B7280]" /></button>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
@@ -289,9 +250,7 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
           {SORT.map((s) => (
             <button key={s} onClick={() => setFilters((p) => ({ ...p, sort: s }))}
               className={`px-3 py-1.5 rounded-xl border text-xs font-semibold text-left transition
-                ${filters.sort === s
-                  ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-                  : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+                ${filters.sort === s ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
               {s}
             </button>
           ))}
@@ -310,19 +269,15 @@ const AdvancedFilters = ({ filters, setFilters, onClose }) => (
         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Listing Quality</p>
         <label className="flex items-center gap-2.5 cursor-pointer mb-3">
           <div onClick={() => setFilters((p) => ({ ...p, verifiedOnly: !p.verifiedOnly }))}
-            className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5
-              ${filters.verifiedOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
-            <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300
-              ${filters.verifiedOnly ? "translate-x-4" : "translate-x-0"}`} />
+            className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5 ${filters.verifiedOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
+            <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300 ${filters.verifiedOnly ? "translate-x-4" : "translate-x-0"}`} />
           </div>
           <span className="text-sm font-medium text-[#0A1628]">Verified only</span>
         </label>
         <label className="flex items-center gap-2.5 cursor-pointer">
           <div onClick={() => setFilters((p) => ({ ...p, lowRiskOnly: !p.lowRiskOnly }))}
-            className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5
-              ${filters.lowRiskOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
-            <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300
-              ${filters.lowRiskOnly ? "translate-x-4" : "translate-x-0"}`} />
+            className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5 ${filters.lowRiskOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
+            <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300 ${filters.lowRiskOnly ? "translate-x-4" : "translate-x-0"}`} />
           </div>
           <span className="text-sm font-medium text-[#0A1628]">Low risk only</span>
         </label>
@@ -362,40 +317,29 @@ const BuyerFeed = () => {
       {/* Search */}
       <div className="bg-white border-b border-[#E0D9CF] px-4 py-3">
         <div className="flex items-center gap-2 bg-[#F7F4EF] rounded-xl px-3 py-2 border border-[#E0D9CF] focus-within:border-[#C9A84C] transition">
-          <RiSearchLine size={16} className="text-[#6B7280] flex-shrink-0" />
+          <Search size={16} className="text-[#6B7280] flex-shrink-0" />
           <input type="text" placeholder="Search listings..."
             value={filters.search}
             onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
             className="flex-1 text-sm text-[#0A1628] outline-none placeholder-[#6B7280] bg-transparent" />
           {filters.search && (
             <button onClick={() => setFilters((p) => ({ ...p, search: "" }))}>
-              <RiCloseLine size={16} className="text-[#6B7280]" />
+              <X size={16} className="text-[#6B7280]" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Filter bar */}
-      <FilterBar
-        filters={filters} setFilters={setFilters}
-        total={filtered.length}
-        showFilters={showFilters} setShowFilters={setShowFilters}
-      />
+      <FilterBar filters={filters} setFilters={setFilters} total={filtered.length} showFilters={showFilters} setShowFilters={setShowFilters} />
 
-      {/* Advanced filters */}
-      {showFilters && (
-        <AdvancedFilters
-          filters={filters} setFilters={setFilters}
-          onClose={() => setShowFilters(false)}
-        />
-      )}
+      {showFilters && <AdvancedFilters filters={filters} setFilters={setFilters} onClose={() => setShowFilters(false)} />}
 
       {/* Feed */}
       <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-5">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center py-24 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#E8D5A3]/40 border border-[#C9A84C]/20 flex items-center justify-center mb-4">
-              <RiHome4Line size={28} className="text-[#C9A84C]" />
+              <Home size={28} className="text-[#C9A84C]" />
             </div>
             <p className="text-[#0A1628] font-bold text-lg">No listings found</p>
             <p className="text-[#6B7280] text-sm mt-1">Try adjusting your filters.</p>

@@ -2,20 +2,9 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  RiSearchLine,
-  RiCloseLine,
-  RiMapPinLine,
-  RiTimeLine,
-  RiMessage3Line,
-  RiShareLine,
-  RiSendPlaneLine,
-  RiHeart3Line,
-  RiHeart3Fill,
-  RiHome4Line,
-  RiMoneyDollarCircleLine,
-  RiShieldCheckFill,
-} from "react-icons/ri";
-import { MdTune } from "react-icons/md";
+  Search, X, MapPin, Clock, MessageCircle, Share2,
+  Send, Heart, Home, DollarSign, ShieldCheck, SlidersHorizontal
+} from "lucide-react";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const BUYER_REQUESTS = [
@@ -83,33 +72,21 @@ const OfferModal = ({ request, onClose, onSend }) => {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div className="bg-[#0A1628] px-5 py-4">
-          <p className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-widest mb-0.5">
-            Send Offer
-          </p>
+          <p className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-widest mb-0.5">Send Offer</p>
           <p className="text-[#F7F4EF] font-bold text-sm truncate">{request.title}</p>
           <p className="text-[#8A9BB5] text-xs mt-0.5">To: {request.buyer}</p>
         </div>
         <div className="p-5 flex flex-col gap-4">
           <div>
-            <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5 block">
-              Your Offer Price
-            </label>
-            <input
-              type="text" placeholder="e.g. ₦2,500,000/yr"
-              value={price}
+            <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5 block">Your Offer Price</label>
+            <input type="text" placeholder="e.g. ₦2,500,000/yr" value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-[#E0D9CF] text-sm text-[#0A1628] bg-[#F7F4EF] outline-none focus:ring-2 focus:ring-[#C9A84C] focus:border-[#C9A84C] transition"
-            />
+              className="w-full px-3 py-2.5 rounded-xl border border-[#E0D9CF] text-sm text-[#0A1628] bg-[#F7F4EF] outline-none focus:ring-2 focus:ring-[#C9A84C] transition" />
           </div>
           <div>
-            <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5 block">
-              Message
-            </label>
-            <textarea
-              rows={4} value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-[#E0D9CF] text-sm text-[#0A1628] bg-[#F7F4EF] outline-none focus:ring-2 focus:ring-[#C9A84C] focus:border-[#C9A84C] transition resize-none"
-            />
+            <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5 block">Message</label>
+            <textarea rows={4} value={message} onChange={(e) => setMessage(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-[#E0D9CF] text-sm text-[#0A1628] bg-[#F7F4EF] outline-none focus:ring-2 focus:ring-[#C9A84C] transition resize-none" />
           </div>
           <div className="flex gap-2 pt-1">
             <button onClick={onClose}
@@ -118,7 +95,7 @@ const OfferModal = ({ request, onClose, onSend }) => {
             </button>
             <button onClick={() => { onSend(request.id, { price, message }); onClose(); }}
               className="flex-1 flex items-center justify-center gap-2 bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-2.5 rounded-xl text-sm font-bold transition">
-              <RiSendPlaneLine size={15} /> Send Offer
+              <Send size={15} /> Send Offer
             </button>
           </div>
         </div>
@@ -129,12 +106,10 @@ const OfferModal = ({ request, onClose, onSend }) => {
 
 // ─── Request Card ─────────────────────────────────────────────────────────────
 const RequestCard = ({ request, saved, onSave, onOffer }) => {
-  const navigate  = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl border border-[#E0D9CF] overflow-hidden hover:border-[#C9A84C]/30 transition-all duration-200">
-
       {/* Buyer header */}
       <div className="flex items-start justify-between px-4 pt-4 pb-3 gap-3">
         <div className="flex items-center gap-3">
@@ -144,23 +119,17 @@ const RequestCard = ({ request, saved, onSave, onOffer }) => {
           <div>
             <div className="flex items-center gap-1.5">
               <p className="text-sm font-bold text-[#0A1628]">{request.buyer}</p>
-              {request.buyerVerified && (
-                <RiShieldCheckFill size={13} className="text-[#C9A84C]" />
-              )}
+              {request.buyerVerified && <ShieldCheck size={13} className="text-[#C9A84C]" />}
             </div>
             <p className="text-[10px] text-[#6B7280] flex items-center gap-0.5 mt-0.5">
-              <RiTimeLine size={10} /> {request.timePosted}
+              <Clock size={10} /> {request.timePosted}
             </p>
           </div>
         </div>
         <div className="flex gap-1.5 flex-shrink-0 flex-wrap justify-end">
-          <span className="bg-[#0A1628] text-[#C9A84C] text-[10px] font-bold px-2.5 py-1 rounded-full">
-            {request.type}
-          </span>
+          <span className="bg-[#0A1628] text-[#C9A84C] text-[10px] font-bold px-2.5 py-1 rounded-full">{request.type}</span>
           {request.urgent && (
-            <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-full">
-              Urgent
-            </span>
+            <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-full">Urgent</span>
           )}
         </div>
       </div>
@@ -169,13 +138,11 @@ const RequestCard = ({ request, saved, onSave, onOffer }) => {
       <div className="px-4 pb-3">
         <h3 className="font-bold text-[#0A1628] text-base mb-1">{request.title}</h3>
         <p className="text-xs text-[#6B7280] flex items-center gap-1 mb-3">
-          <RiMapPinLine size={11} /> {request.location}, {request.state}
+          <MapPin size={11} /> {request.location}, {request.state}
         </p>
-
         <div className="flex flex-wrap gap-2 mb-3">
           <span className="flex items-center gap-1 bg-[#F7F4EF] border border-[#E0D9CF] text-xs text-[#0A1628] font-medium px-2.5 py-1 rounded-xl">
-            <RiMoneyDollarCircleLine size={13} className="text-[#C9A84C]" />
-            {request.budget}
+            <DollarSign size={13} className="text-[#C9A84C]" /> {request.budget}
           </span>
           {request.beds && (
             <span className="bg-[#F7F4EF] border border-[#E0D9CF] text-xs text-[#0A1628] font-medium px-2.5 py-1 rounded-xl">
@@ -186,7 +153,6 @@ const RequestCard = ({ request, saved, onSave, onOffer }) => {
             📅 Move in: {request.moveIn}
           </span>
         </div>
-
         <p className={`text-sm text-[#6B7280] leading-relaxed ${expanded ? "" : "line-clamp-2"}`}>
           {request.description}
         </p>
@@ -196,14 +162,9 @@ const RequestCard = ({ request, saved, onSave, onOffer }) => {
             {expanded ? "Show less" : "Read more"}
           </button>
         )}
-
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#E0D9CF]">
-          <span className="text-xs text-[#6B7280]">
-            <span className="font-bold text-[#0A1628]">{request.offers}</span> offers sent
-          </span>
-          <span className="text-xs text-[#6B7280]">
-            <span className="font-bold text-[#0A1628]">{request.saves}</span> agents saved
-          </span>
+          <span className="text-xs text-[#6B7280]"><span className="font-bold text-[#0A1628]">{request.offers}</span> offers sent</span>
+          <span className="text-xs text-[#6B7280]"><span className="font-bold text-[#0A1628]">{request.saves}</span> agents saved</span>
         </div>
       </div>
 
@@ -212,24 +173,21 @@ const RequestCard = ({ request, saved, onSave, onOffer }) => {
         <div className="flex items-center gap-1">
           <button onClick={() => onSave(request.id)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
-            {saved
-              ? <RiHeart3Fill size={17} className="text-red-500" />
-              : <RiHeart3Line size={17} />}
+            <Heart size={17} className={saved ? "fill-red-500 text-red-500" : ""} />
             <span className="text-xs">Save</span>
           </button>
-          <button onClick={() => navigate("/dashboard/agent/messages")}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
-            <RiMessage3Line size={17} />
+          <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
+            <MessageCircle size={17} />
             <span className="text-xs">Message</span>
           </button>
           <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#F7F4EF] transition text-[#6B7280] hover:text-[#0A1628]">
-            <RiShareLine size={17} />
+            <Share2 size={17} />
             <span className="text-xs hidden sm:block">Share</span>
           </button>
         </div>
         <button onClick={() => onOffer(request)}
           className="flex items-center gap-2 bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] text-xs font-bold px-4 py-2 rounded-xl transition duration-200">
-          <RiSendPlaneLine size={14} /> Send Offer
+          <Send size={14} /> Send Offer
         </button>
       </div>
     </div>
@@ -268,39 +226,34 @@ const AgentFeed = () => {
   }, [filters]);
 
   return (
-    <div className="min-h-screen bg-[#F7F4EF]">
-
+    <div className="bg-[#F7F4EF]">
       {/* Search */}
-      <div className="bg-white border-b border-[#E0D9CF] px-4 py-3">
+      <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 -mx-5 sm:-mx-6 mb-4">
         <div className="flex items-center gap-2 bg-[#F7F4EF] rounded-xl px-3 py-2 border border-[#E0D9CF] focus-within:border-[#C9A84C] transition">
-          <RiSearchLine size={16} className="text-[#6B7280] flex-shrink-0" />
+          <Search size={16} className="text-[#6B7280] flex-shrink-0" />
           <input type="text" placeholder="Search buyer requests..."
             value={filters.search}
             onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
             className="flex-1 text-sm text-[#0A1628] outline-none placeholder-[#6B7280] bg-transparent" />
           {filters.search && (
             <button onClick={() => setFilters((p) => ({ ...p, search: "" }))}>
-              <RiCloseLine size={16} className="text-[#6B7280]" />
+              <X size={16} className="text-[#6B7280]" />
             </button>
           )}
         </div>
       </div>
 
       {/* Filter bar */}
-      <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3 overflow-x-auto">
+      <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 -mx-5 sm:-mx-6 flex items-center gap-3 overflow-x-auto mb-4">
         <button onClick={() => setShowFilters((v) => !v)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
-            ${showFilters
-              ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-              : "bg-white text-[#0A1628] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
-          <MdTune size={13} /> Filters
+            ${showFilters ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#0A1628] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+          <SlidersHorizontal size={13} /> Filters
         </button>
         {TYPES.map((t) => (
           <button key={t} onClick={() => setFilters((p) => ({ ...p, type: t }))}
             className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
-              ${filters.type === t
-                ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-                : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+              ${filters.type === t ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
             {t}
           </button>
         ))}
@@ -308,9 +261,7 @@ const AgentFeed = () => {
         {STATES.map((s) => (
           <button key={s} onClick={() => setFilters((p) => ({ ...p, state: s }))}
             className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition
-              ${filters.state === s
-                ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-                : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+              ${filters.state === s ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
             {s}
           </button>
         ))}
@@ -321,12 +272,10 @@ const AgentFeed = () => {
 
       {/* Advanced filters */}
       {showFilters && (
-        <div className="bg-[#F7F4EF] border-b border-[#E0D9CF] px-4 py-4">
+        <div className="bg-white border border-[#E0D9CF] rounded-2xl px-4 py-4 mb-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-bold text-[#0A1628]">Advanced Filters</p>
-            <button onClick={() => setShowFilters(false)}>
-              <RiCloseLine size={18} className="text-[#6B7280]" />
-            </button>
+            <button onClick={() => setShowFilters(false)}><X size={18} className="text-[#6B7280]" /></button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -335,9 +284,7 @@ const AgentFeed = () => {
                 {SORT.map((s) => (
                   <button key={s} onClick={() => setFilters((p) => ({ ...p, sort: s }))}
                     className={`px-3 py-1.5 rounded-xl border text-xs font-semibold text-left transition
-                      ${filters.sort === s
-                        ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]"
-                        : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
+                      ${filters.sort === s ? "bg-[#0A1628] text-[#C9A84C] border-[#0A1628]" : "bg-white text-[#6B7280] border-[#E0D9CF] hover:border-[#C9A84C]/50"}`}>
                     {s}
                   </button>
                 ))}
@@ -356,19 +303,15 @@ const AgentFeed = () => {
               <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Buyer Quality</p>
               <label className="flex items-center gap-2.5 cursor-pointer mb-3">
                 <div onClick={() => setFilters((p) => ({ ...p, verifiedOnly: !p.verifiedOnly }))}
-                  className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5
-                    ${filters.verifiedOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300
-                    ${filters.verifiedOnly ? "translate-x-4" : "translate-x-0"}`} />
+                  className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5 ${filters.verifiedOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300 ${filters.verifiedOnly ? "translate-x-4" : "translate-x-0"}`} />
                 </div>
                 <span className="text-sm font-medium text-[#0A1628]">Verified buyers only</span>
               </label>
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <div onClick={() => setFilters((p) => ({ ...p, urgentOnly: !p.urgentOnly }))}
-                  className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5
-                    ${filters.urgentOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300
-                    ${filters.urgentOnly ? "translate-x-4" : "translate-x-0"}`} />
+                  className={`w-10 h-6 rounded-full flex items-center transition-all duration-300 px-0.5 ${filters.urgentOnly ? "bg-[#C9A84C]" : "bg-[#E0D9CF]"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-300 ${filters.urgentOnly ? "translate-x-4" : "translate-x-0"}`} />
                 </div>
                 <span className="text-sm font-medium text-[#0A1628]">Urgent requests only</span>
               </label>
@@ -378,11 +321,11 @@ const AgentFeed = () => {
       )}
 
       {/* Feed */}
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-5">
+      <div className="max-w-2xl mx-auto flex flex-col gap-5">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center py-24 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#E8D5A3]/40 border border-[#C9A84C]/20 flex items-center justify-center mb-4">
-              <RiHome4Line size={28} className="text-[#C9A84C]" />
+              <Home size={28} className="text-[#C9A84C]" />
             </div>
             <p className="text-[#0A1628] font-bold text-lg">No requests found</p>
             <p className="text-[#6B7280] text-sm mt-1">Try adjusting your filters.</p>
@@ -393,25 +336,14 @@ const AgentFeed = () => {
           </div>
         ) : (
           filtered.map((request) => (
-            <RequestCard
-              key={request.id}
-              request={request}
-              saved={saved[request.id]}
-              onSave={onSave}
-              onOffer={setOfferTarget}
-              offerSent={!!sentOffers[request.id]}
-            />
+            <RequestCard key={request.id} request={request} saved={saved[request.id]}
+              onSave={onSave} onOffer={setOfferTarget} offerSent={!!sentOffers[request.id]} />
           ))
         )}
       </div>
 
-      {/* Offer modal */}
       {offerTarget && (
-        <OfferModal
-          request={offerTarget}
-          onClose={() => setOfferTarget(null)}
-          onSend={onSend}
-        />
+        <OfferModal request={offerTarget} onClose={() => setOfferTarget(null)} onSend={onSend} />
       )}
     </div>
   );

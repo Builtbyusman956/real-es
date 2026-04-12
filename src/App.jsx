@@ -13,43 +13,47 @@ import BuyerDashboard  from "./pages/dashboard/BuyerDashboard";
 import PropertyDetails from "./pages/PropertyDetails";
 import About           from "./pages/About";
 import Contact         from "./pages/Contact";
-import BuyerFeed       from "./pages/dashboard/BuyerFeed";
-import AgentFeed       from "./pages/dashboard/AgentFeed";
 
-// ✅ Waits for role to load before redirecting
 const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
-
   if (!user) return <Navigate to="/login" replace />;
-  if (roleLoading) return null; // ⏳ wait for Firestore role fetch
-
+  if (roleLoading) return null;
   if (userRole === 'agent') return <Navigate to="/dashboard/agent" replace />;
   return <Navigate to="/dashboard/buyer" replace />;
 };
 
-// ✅ Inner component so useLocation is inside BrowserRouter
 const AppRoutes = () => {
   const { user } = useAuth();
-  const location = useLocation();
-  const isDashboard = location.pathname.startsWith("/dashboard");
 
   return (
     <>
-      {!isDashboard && <Navbar />}
+      <Navbar />
       <Routes>
+        {/* Public */}
         <Route path="/"             element={<Home />} />
         <Route path="/browse"       element={<Browse />} />
         <Route path="/about"        element={<About />} />
         <Route path="/contact"      element={<Contact />} />
         <Route path="/property/:id" element={<PropertyDetails />} />
 
+        {/* Auth */}
         <Route path="/login"    element={user ? <RoleBasedRedirect /> : <Login />} />
         <Route path="/register" element={user ? <RoleBasedRedirect /> : <Register />} />
 
-        <Route path="/dashboard/buyer/*"  element={<ProtectedRoute allowedRoles={['buyer']}><BuyerDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/buyer/feed" element={<ProtectedRoute allowedRoles={['buyer']}><BuyerFeed /></ProtectedRoute>} />
-        <Route path="/dashboard/agent/*"  element={<ProtectedRoute allowedRoles={['agent']}><AgentDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/agent/feed" element={<ProtectedRoute allowedRoles={['agent']}><AgentFeed /></ProtectedRoute>} />
+        {/* Buyer dashboard — all sub-routes handled internally */}
+        <Route path="/dashboard/buyer/*" element={
+          <ProtectedRoute allowedRoles={['buyer']}>
+            <BuyerDashboard />
+          </ProtectedRoute>
+        } />
+
+        {/* Agent dashboard — all sub-routes handled internally */}
+        <Route path="/dashboard/agent/*" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <AgentDashboard />
+          </ProtectedRoute>
+        } />
+
         <Route path="/dashboard" element={<RoleBasedRedirect />} />
 
         <Route path="*" element={
