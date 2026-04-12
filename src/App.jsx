@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -16,81 +16,42 @@ import Contact         from "./pages/Contact";
 import BuyerFeed       from "./pages/dashboard/BuyerFeed";
 import AgentFeed       from "./pages/dashboard/AgentFeed";
 
+// ✅ Waits for role to load before redirecting
 const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
   if (roleLoading) return null; // ⏳ wait for Firestore role fetch
 
-  // ✅ Default to buyer if role is null (shouldn't happen but safe fallback)
   if (userRole === 'agent') return <Navigate to="/dashboard/agent" replace />;
   return <Navigate to="/dashboard/buyer" replace />;
 };
 
-function App() {
+// ✅ Inner component so useLocation is inside BrowserRouter
+const AppRoutes = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith("/dashboard");
 
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!isDashboard && <Navbar />}
       <Routes>
-        {/* Public routes */}
         <Route path="/"             element={<Home />} />
         <Route path="/browse"       element={<Browse />} />
         <Route path="/about"        element={<About />} />
         <Route path="/contact"      element={<Contact />} />
         <Route path="/property/:id" element={<PropertyDetails />} />
 
-        {/* Auth routes - redirect to dashboard if already logged in */}
-        <Route
-          path="/login"
-          element={user ? <RoleBasedRedirect /> : <Login />}
-        />
-        <Route
-          path="/register"
-          element={user ? <RoleBasedRedirect /> : <Register />}
-        />
+        <Route path="/login"    element={user ? <RoleBasedRedirect /> : <Login />} />
+        <Route path="/register" element={user ? <RoleBasedRedirect /> : <Register />} />
 
-        {/* Protected Buyer Routes */}
-        <Route
-          path="/dashboard/buyer/*"
-          element={
-            <ProtectedRoute allowedRoles={['buyer']}>
-              <BuyerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/buyer/feed"
-          element={
-            <ProtectedRoute allowedRoles={['buyer']}>
-              <BuyerFeed />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Protected Agent Routes */}
-        <Route
-          path="/dashboard/agent/*"
-          element={
-            <ProtectedRoute allowedRoles={['agent']}>
-              <AgentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/agent/feed"
-          element={
-            <ProtectedRoute allowedRoles={['agent']}>
-              <AgentFeed />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Root dashboard redirect */}
+        <Route path="/dashboard/buyer/*"  element={<ProtectedRoute allowedRoles={['buyer']}><BuyerDashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/buyer/feed" element={<ProtectedRoute allowedRoles={['buyer']}><BuyerFeed /></ProtectedRoute>} />
+        <Route path="/dashboard/agent/*"  element={<ProtectedRoute allowedRoles={['agent']}><AgentDashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/agent/feed" element={<ProtectedRoute allowedRoles={['agent']}><AgentFeed /></ProtectedRoute>} />
         <Route path="/dashboard" element={<RoleBasedRedirect />} />
 
-        {/* 404 Fallback */}
         <Route path="*" element={
           <div className="h-screen flex items-center justify-center">
             <div className="text-center">
@@ -103,6 +64,14 @@ function App() {
           </div>
         } />
       </Routes>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   );
 }

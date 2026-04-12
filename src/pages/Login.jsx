@@ -85,18 +85,34 @@ const CredentialsStep = ({ role, onNext }) => {
     try {
       setLoading(true);
       setError("");
-      await login(form.email, form.password);
+      const result = await login(form.email, form.password);
+
+      // ✅ Verify actual role from Firestore
+      const { getDoc, doc } = await import("firebase/firestore");
+      const { db } = await import("../firebase");
+      const snap = await getDoc(doc(db, "users", result.user.uid));
+      const actualRole = snap.exists() ? snap.data().role : "buyer";
+
+      if (actualRole !== role) {
+        setError(`This account is registered as a ${actualRole}, not a ${role}. Please select the correct role.`);
+        const { signOut } = await import("firebase/auth");
+        const { auth } = await import("../firebase");
+        await signOut(auth);
+        return;
+      }
 
       if (role === "agent") {
         onNext(); // agents → OTP step
       }
-      // ✅ buyers: no manual navigate — App.jsx /login route redirects via RoleBasedRedirect
+      // buyers: App.jsx /login route redirects via RoleBasedRedirect
     } catch (err) {
       console.error("Login error:", err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError("Invalid email or password.");
       } else if (err.code === 'auth/too-many-requests') {
         setError("Too many failed attempts. Please try again later.");
+      } else if (!err.code) {
+        // role mismatch error already set above
       } else {
         setError("Failed to sign in. Please try again.");
       }

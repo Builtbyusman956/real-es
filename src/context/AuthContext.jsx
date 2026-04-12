@@ -90,18 +90,23 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
 
       if (user) {
-        const docRef  = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setUserRole(docSnap.data().role);
+        try {
+          const docRef  = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUserRole(docSnap.data().role);
+          } else {
+            setUserRole("buyer"); // ✅ fallback if no Firestore doc yet
+          }
+        } catch {
+          setUserRole("buyer"); // ✅ fallback on network/permission error
         }
       } else {
         setUserRole(null);
       }
 
       setLoading(false);
-      setRoleLoading(false); // ✅ role is now resolved
+      setRoleLoading(false); // ✅ always resolves
     });
 
     return unsubscribe;
