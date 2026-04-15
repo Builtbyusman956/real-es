@@ -15,6 +15,10 @@ import Contact from "./pages/Contact";
 import Verification from "./pages/Verification";
 import AgentDashboard from "./pages/dashboard/AgentDashboard";
 import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
+import AgentVerification from "./pages/dashboard/AgentVerification";
+import AgentSettings from "./pages/dashboard/AgentSettings";
+import BuyerVerification from "./pages/dashboard/BuyerVerification";
+import BuyerSettings from "./pages/dashboard/BuyerSettings";
 
 const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
@@ -57,7 +61,23 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Buyer Dashboard */}
+        {/* ─── BUYER DASHBOARD ROUTES ───────────────────────────────────────── */}
+        {/* Specific routes FIRST (before wildcard) */}
+        <Route path="/dashboard/buyer/verification" element={
+          <ProtectedRoute allowedRoles={["buyer"]}>
+            <BuyerVerification />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/buyer/settings" element={
+          <ProtectedRoute allowedRoles={["buyer"]}>
+            <VerificationGuard requireVerification={true}>
+              <BuyerSettings />
+            </VerificationGuard>
+          </ProtectedRoute>
+        } />
+
+        {/* Wildcard route LAST */}
         <Route path="/dashboard/buyer/*" element={
           <ProtectedRoute allowedRoles={["buyer"]}>
             <VerificationGuard requireVerification={true}>
@@ -66,7 +86,23 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Agent Dashboard */}
+        {/* ─── AGENT DASHBOARD ROUTES ───────────────────────────────────────── */}
+        {/* Specific routes FIRST (before wildcard) */}
+        <Route path="/dashboard/agent/verification" element={
+          <ProtectedRoute allowedRoles={["agent"]}>
+            <AgentVerification />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/agent/settings" element={
+          <ProtectedRoute allowedRoles={["agent"]}>
+            <VerificationGuard requireVerification={true}>
+              <AgentSettings />
+            </VerificationGuard>
+          </ProtectedRoute>
+        } />
+
+        {/* Wildcard route LAST */}
         <Route path="/dashboard/agent/*" element={
           <ProtectedRoute allowedRoles={["agent"]}>
             <VerificationGuard requireVerification={true}>

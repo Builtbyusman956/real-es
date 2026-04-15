@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   Heart, Calendar, Search, Home, Bell,
   MapPin, Bed, Bath, Clock, ChevronRight,
-  ShieldCheck, User, Trash2, Rss, MessageCircle
+  ShieldCheck, User, Trash2, Rss, MessageCircle, Settings, Shield
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BuyerFeed from "./BuyerFeed";
@@ -65,19 +65,35 @@ const TABS = [
 ];
 
 // ─── Tab bar ──────────────────────────────────────────────────────────────────
-const TabBar = ({ active, setActive }) => (
+const TabBar = ({ active, setActive, navigate }) => (
   <div className="bg-white border-b border-[#E0D9CF] px-4 sm:px-6 sticky top-0 z-10">
-    <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-      {TABS.map(({ id, label, icon: Icon }) => (
-        <button key={id} onClick={() => setActive(id)}
-          className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200
-            ${active === id
-              ? "border-[#C9A84C] text-[#0A1628]"
-              : "border-transparent text-[#6B7280] hover:text-[#0A1628]"}`}>
-          <Icon size={15} />
-          {label}
+    <div className="flex items-center justify-between">
+      <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button key={id} onClick={() => setActive(id)}
+            className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200
+              ${active === id
+                ? "border-[#C9A84C] text-[#0A1628]"
+                : "border-transparent text-[#6B7280] hover:text-[#0A1628]"}`}>
+            <Icon size={15} />
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <button 
+          onClick={() => navigate("/dashboard/buyer/verification")}
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#6B7280] hover:text-[#C9A84C] transition"
+        >
+          <Shield size={16} /> Verify
         </button>
-      ))}
+        <button 
+          onClick={() => navigate("/dashboard/buyer/settings")}
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#6B7280] hover:text-[#C9A84C] transition"
+        >
+          <Settings size={16} /> Settings
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -303,7 +319,7 @@ const BuyerDashboard = () => {
   return (
     <div className="min-h-screen bg-[#F7F4EF]">
       <div>
-        <TabBar active={active} setActive={setActive} />
+        <TabBar active={active} setActive={setActive} navigate={navigate} />
         <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
           {active === "overview"    && <OverviewTab    setActive={setActive} navigate={navigate} />}
           {active === "feed"        && <BuyerFeed />}
