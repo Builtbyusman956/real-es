@@ -3,10 +3,11 @@ import { useState } from "react";
 import {
   Heart, Calendar, Search, Home, Bell,
   MapPin, Bed, Bath, Clock, ChevronRight,
-  ShieldCheck, User, Trash2, Rss
+  ShieldCheck, User, Trash2, Rss, MessageCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BuyerFeed from "./BuyerFeed";
+import Messages from "./Messages";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const BUYER = {
@@ -60,6 +61,7 @@ const TABS = [
   { id: "saved",       label: "Saved",       icon: Heart    },
   { id: "inspections", label: "Inspections", icon: Calendar },
   { id: "searches",    label: "Searches",    icon: Search   },
+  { id: "messages",    label: "Messages",    icon: MessageCircle }, // ADD THIS
 ];
 
 // ─── Tab bar ──────────────────────────────────────────────────────────────────
@@ -309,6 +311,7 @@ const BuyerDashboard = () => {
           {active === "saved"       && <SavedTab       navigate={navigate} />}
           {active === "inspections" && <InspectionsTab />}
           {active === "searches"    && <SearchesTab    navigate={navigate} />}
+          {active === "messages"    && <Messages />} {/* ADD THIS LINE */}
         </main>
       </div>
     </div>

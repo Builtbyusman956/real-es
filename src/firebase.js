@@ -1,30 +1,27 @@
+// src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
-// Environment config
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyC3BSaH6KT3s6dHKV-ZmA-uX_rd1KKJLJE",        // ← Replace with real key
+  authDomain: "real-es-f854c.firebaseapp.com",
+  projectId: "real-es-f854c",
+  storageBucket: "real-es-f854c.appspot.com",
+  messagingSenderId: "xxxxxxxxxxxx",
+  appId: "1:xxxxxxxxxxxx:web:xxxxxxxxxxxxxxxxxxxxxxxx"
 };
 
-// Initialize app
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-// Services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager() // handles multi-tab, replaces enableIndexedDbPersistence
+  }),
+});
 
-// Safe analytics (prevents crashes)
-let analytics;
-if (typeof window !== "undefined") {
-  analytics = getAnalytics(app);
-}
+console.log("✅ Firebase initialized - Project:", firebaseConfig.projectId);
 
-export default app;
+export { auth, db };

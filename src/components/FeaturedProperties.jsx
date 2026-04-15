@@ -53,12 +53,22 @@ const PROPERTIES = [
   },
 ];
 
+const getInitials = (name) => {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("");
+};
+
 const PropertyCard = ({ property }) => {
   const navigate = useNavigate();
+
   return (
     <div
       onClick={() => navigate(`/property/${property.id}`)}
-      className="bg-white rounded-2xl border border-[#E0D9CF] overflow-hidden hover:border-[#C9A84C]/50 hover:shadow-xl hover:shadow-[#C9A84C]/8 transition-all duration-300 cursor-pointer group"
+      className="bg-white rounded-2xl border border-[#E0D9CF] overflow-hidden hover:border-[#C9A84C]/50 hover:shadow-[0_10px_30px_rgba(201,168,76,0.12)] transition-all duration-300 cursor-pointer group"
     >
       {/* Image */}
       <div className="relative overflow-hidden h-48">
@@ -91,8 +101,8 @@ const PropertyCard = ({ property }) => {
           <MapPin size={11} /> {property.location}
         </p>
 
-        {/* Beds/baths */}
-        {property.beds && (
+        {/* Fix 1: use != null instead of truthy check to handle beds: 0 correctly */}
+        {property.beds != null && (
           <div className="flex gap-3 mb-3">
             <span className="text-xs text-[#6B7280] flex items-center gap-1">
               <Bed size={12} /> {property.beds} Beds
@@ -110,13 +120,14 @@ const PropertyCard = ({ property }) => {
           </span>
         </div>
 
-        {/* Agent */}
+        {/* Agent — Fix 2: safe initials via getInitials() helper */}
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#E0D9CF]">
           <div className="w-6 h-6 rounded-full bg-[#0A1628] flex items-center justify-center text-[#C9A84C] text-[9px] font-bold flex-shrink-0">
-            {property.agent.split(" ").map((n) => n[0]).join("")}
+            {getInitials(property.agent)}
           </div>
           <p className="text-xs text-[#6B7280]">
-            Listed by <span className="font-semibold text-[#0A1628]">{property.agent}</span>
+            Listed by{" "}
+            <span className="font-semibold text-[#0A1628]">{property.agent ?? "Unknown"}</span>
           </p>
         </div>
       </div>
@@ -126,6 +137,7 @@ const PropertyCard = ({ property }) => {
 
 const FeaturedProperties = () => {
   const navigate = useNavigate();
+
   return (
     <section className="bg-[#F7F4EF] py-24 px-6 sm:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
@@ -148,9 +160,11 @@ const FeaturedProperties = () => {
           </button>
         </div>
 
-        {/* Grid */}
+        {/* Grid — Fix 3: stable key from property.id (not index) */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {PROPERTIES.map((p) => <PropertyCard key={p.id} property={p} />)}
+          {PROPERTIES.map((p) => (
+            <PropertyCard key={p.id} property={p} />
+          ))}
         </div>
 
       </div>
