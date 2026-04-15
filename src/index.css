@@ -6,10 +6,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles */
+/* ================= BASE ================= */
 body {
   font-family: 'Inter', sans-serif;
   color: #111827;
   background-color: #FFFFFF;
   line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ================= COMPONENTS ================= */
+@layer components {
+
+  .input {
+    @apply w-full px-4 py-3 border rounded-xl bg-white text-gray-900 focus:outline-none;
+    border-color: #E0D9CF;
+  }
+
+  .input:focus {
+    border-color: #C9A84C;
+  }
+
+  .input:disabled {
+    background-color: #F7F4EF;
+    color: #6B7280;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    @apply font-bold px-5 py-2.5 rounded-xl transition duration-200;
+    background-color: #C9A84C;
+    color: #0A1628;
+  }
+
+  .btn-primary:hover {
+    background-color: #b8943d;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-secondary {
+    @apply border font-semibold px-5 py-2.5 rounded-xl transition duration-200;
+    border-color: #E0D9CF;
+    color: #0A1628;
+  }
+
+  .btn-secondary:hover {
+    background-color: #F7F4EF;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl;
+    border: 1px solid #E0D9CF;
+  }
+
 }

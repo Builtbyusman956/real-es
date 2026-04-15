@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
+  createUserWithEmailAndPassword, // ✅ added
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -18,43 +19,63 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]             = useState(null);
-  const [userRole, setUserRole]     = useState(null); // ✅ was missing
-  const [loading, setLoading]       = useState(true);
-  const [roleLoading, setRoleLoading] = useState(true); // ✅ was missing
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
 
-  // Fetch user data from Firestore with offline tolerance
+  // Fetch user data
   const fetchUserData = async (uid) => {
     try {
       const userSnap = await getDoc(doc(db, "users", uid));
       return userSnap.exists() ? userSnap.data() : {};
     } catch (err) {
-      const isOffline =
-        err.code === "unavailable" ||
-        err.code === "failed-precondition" ||
-        err.message?.includes("offline");
-
-      if (isOffline) {
-        console.warn("Firestore offline. Using basic auth user data.");
-      } else {
-        console.warn("Failed to fetch user data:", err.message);
-      }
+      console.warn("Failed to fetch user data:", err.message);
       return {};
     }
   };
 
-  // Email + Password Login
+  // ✅ REGISTER FUNCTION (NEW)
+  const registerUser = async (email, password, extraData = {}) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+
+      const userData = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: extraData.displayName || "",
+        role: extraData.role || "buyer",
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+      };
+
+      await setDoc(doc(db, "users", firebaseUser.uid), userData);
+
+      setUser({ ...firebaseUser, ...userData });
+      setUserRole(userData.role);
+
+      return userCredential;
+    } catch (error) {
+      console.error("Register error:", error);
+      throw error;
+    }
+  };
+
+  // Login
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
+
       const userData = await fetchUserData(firebaseUser.uid);
 
       setUser({ ...firebaseUser, ...userData });
-      setUserRole(userData.role || null); // ✅ set role after login
+      setUserRole(userData.role || null);
+
       return userCredential;
     } catch (error) {
-      console.error("Email login error:", error);
+      console.error("Login error:", error);
       throw error;
     }
   };
@@ -67,7 +88,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
-      const userSnap = await getDoc(doc(db, "users", firebaseUser.uid));
+
+      const userRef = doc(db, "users", firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
+
       let userData;
 
       if (!userSnap.exists()) {
@@ -80,18 +104,15 @@ export const AuthProvider = ({ children }) => {
           createdAt: new Date().toISOString(),
           lastLogin: new Date().toISOString(),
         };
-        await setDoc(doc(db, "users", firebaseUser.uid), userData);
+
+        await setDoc(userRef, userData);
       } else {
         userData = userSnap.data();
-        if (selectedRole && userData.role && userData.role !== selectedRole) {
-          throw new Error(
-            `This account is registered as a ${userData.role}, not a ${selectedRole}.`
-          );
-        }
       }
 
       setUser({ ...firebaseUser, ...userData });
-      setUserRole(userData.role || null); // ✅ set role after Google login
+      setUserRole(userData.role);
+
       return { user: firebaseUser, role: userData.role };
     } catch (error) {
       console.error("Google login error:", error);
@@ -104,7 +125,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await signOut(auth);
       setUser(null);
-      setUserRole(null); // ✅ clear role on logout
+      setUserRole(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -113,18 +134,16 @@ export const AuthProvider = ({ children }) => {
   // Auth state listener
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-      setRoleLoading(true); // ✅ start role loading
-
-      if (firebaseUser) {
+      setRoleLoading(true);if (firebaseUser) {
         const userData = await fetchUserData(firebaseUser.uid);
         setUser({ ...firebaseUser, ...userData });
-        setUserRole(userData.role || null); // ✅ set role from Firestore
+        setUserRole(userData.role || null);
       } else {
         setUser(null);
         setUserRole(null);
       }
 
-      setLoading(false);    // ✅ no more arbitrary 300ms delay
+      setLoading(false);
       setRoleLoading(false);
     });
 
@@ -133,17 +152,18 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    userRole,      // ✅ now exported
+    userRole,
     loading,
-    roleLoading,   // ✅ now exported
+    roleLoading,
     login,
     loginWithGoogle,
     logout,
+    registerUser, // ✅ FIXED (this was missing before)
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children} {/* ✅ don't render anything until auth resolves */}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
