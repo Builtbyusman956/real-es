@@ -61,12 +61,12 @@ const TABS = [
   { id: "saved",       label: "Saved",       icon: Heart    },
   { id: "inspections", label: "Inspections", icon: Calendar },
   { id: "searches",    label: "Searches",    icon: Search   },
-  { id: "messages",    label: "Messages",    icon: MessageCircle }, // ADD THIS
+  { id: "messages",    label: "Messages",    icon: MessageCircle },
 ];
 
 // ─── Tab bar ──────────────────────────────────────────────────────────────────
 const TabBar = ({ active, setActive }) => (
-  <div className="bg-white border-b border-[#E0D9CF] px-4 sm:px-6 sticky top-16 z-10">
+  <div className="bg-white border-b border-[#E0D9CF] px-4 sm:px-6 sticky top-0 z-10">
     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
       {TABS.map(({ id, label, icon: Icon }) => (
         <button key={id} onClick={() => setActive(id)}
@@ -302,8 +302,7 @@ const BuyerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F7F4EF]">
-      {/* pt-16 to account for fixed Navbar height */}
-      <div className="pt-16">
+      <div>
         <TabBar active={active} setActive={setActive} />
         <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
           {active === "overview"    && <OverviewTab    setActive={setActive} navigate={navigate} />}
@@ -311,7 +310,7 @@ const BuyerDashboard = () => {
           {active === "saved"       && <SavedTab       navigate={navigate} />}
           {active === "inspections" && <InspectionsTab />}
           {active === "searches"    && <SearchesTab    navigate={navigate} />}
-          {active === "messages"    && <Messages />} {/* ADD THIS LINE */}
+          {active === "messages"    && <Messages />}
         </main>
       </div>
     </div>

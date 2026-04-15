@@ -5,7 +5,6 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VerificationGuard from "./components/VerificationGuard";
 
-// Public Pages
 import Home from "./pages/Home";
 import Browse from "./pages/Browse";
 import Register from "./pages/Register";
@@ -14,8 +13,6 @@ import PropertyDetails from "./pages/PropertyDetails";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Verification from "./pages/Verification";
-
-// Dashboard Pages
 import AgentDashboard from "./pages/dashboard/AgentDashboard";
 import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
 
@@ -23,8 +20,16 @@ const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
   if (roleLoading) return null;
-  if (userRole === 'agent') return <Navigate to="/dashboard/agent" replace />;
+  if (userRole === "agent") return <Navigate to="/dashboard/agent" replace />;
   return <Navigate to="/dashboard/buyer" replace />;
+};
+
+// ─── Only show Navbar on public pages ────────────────────────────────────────
+const ConditionalNavbar = () => {
+  const { pathname } = useLocation();
+  const isDashboard = pathname.startsWith("/dashboard");
+  if (isDashboard) return null;
+  return <Navbar />;
 };
 
 const AppRoutes = () => {
@@ -32,7 +37,7 @@ const AppRoutes = () => {
 
   return (
     <>
-      <Navbar />
+      <ConditionalNavbar />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -45,32 +50,31 @@ const AppRoutes = () => {
         <Route path="/login" element={user ? <RoleBasedRedirect /> : <Login />} />
         <Route path="/register" element={user ? <RoleBasedRedirect /> : <Register />} />
 
-        {/* Verification - Required before full dashboard access */}
+        {/* Verification */}
         <Route path="/verify" element={
           <ProtectedRoute>
             <Verification />
           </ProtectedRoute>
         } />
 
-        {/* Buyer Dashboard - All sub-routes handled internally */}
+        {/* Buyer Dashboard */}
         <Route path="/dashboard/buyer/*" element={
-          <ProtectedRoute allowedRoles={['buyer']}>
+          <ProtectedRoute allowedRoles={["buyer"]}>
             <VerificationGuard requireVerification={true}>
               <BuyerDashboard />
             </VerificationGuard>
           </ProtectedRoute>
         } />
 
-        {/* Agent Dashboard - All sub-routes handled internally */}
+        {/* Agent Dashboard */}
         <Route path="/dashboard/agent/*" element={
-          <ProtectedRoute allowedRoles={['agent']}>
+          <ProtectedRoute allowedRoles={["agent"]}>
             <VerificationGuard requireVerification={true}>
               <AgentDashboard />
             </VerificationGuard>
           </ProtectedRoute>
         } />
 
-        {/* Legacy dashboard redirect */}
         <Route path="/dashboard" element={<RoleBasedRedirect />} />
 
         {/* 404 */}

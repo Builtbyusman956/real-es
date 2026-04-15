@@ -88,8 +88,8 @@ const VerificationBanner = () => (
 const Sidebar = ({ active, setActive, open, setOpen }) => (
   <>
     {open && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setOpen(false)} />}
-    <aside className={`fixed top-16 left-0 h-[calc(100vh-64px)] w-60 bg-[#0A1628] z-30 flex flex-col transition-transform duration-300
-      ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:z-auto md:h-auto`}>
+    <aside className={`fixed top-0 left-0 h-screen w-60 bg-[#0A1628] z-30 flex flex-col transition-transform duration-300
+      ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:z-auto`}>
 
       <div className="px-5 py-4 border-b border-[#1A2E4A]">
         <div className="flex items-center gap-3">
@@ -235,7 +235,7 @@ const AgentDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F7F4EF]">
-      <div className="pt-16 flex h-[calc(100vh-64px)]">
+      <div className="flex h-screen">
         <Sidebar active={active} setActive={setActive} open={sidebarOpen} setOpen={setSidebarOpen} />
 
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
