@@ -6,7 +6,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-  createUserWithEmailAndPassword, // ✅ added
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -19,12 +19,12 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser]           = useState(null);
+  const [userRole, setUserRole]   = useState(null);
+  const [loading, setLoading]     = useState(true);
   const [roleLoading, setRoleLoading] = useState(true);
 
-  // Fetch user data
+  // Fetch user data from Firestore
   const fetchUserData = async (uid) => {
     try {
       const userSnap = await getDoc(doc(db, "users", uid));
@@ -35,7 +35,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ REGISTER FUNCTION (NEW)
+  // ✅ Register with email & password
+  // Usage: registerUser(email, password, { displayName, role })
   const registerUser = async (email, password, extraData = {}) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login
+  // Login with email & password
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -80,7 +81,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Google Login
+  // Google sign-in / sign-up
   const loginWithGoogle = async (selectedRole) => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      const userRef = doc(db, "users", firebaseUser.uid);
+      const userRef  = doc(db, "users", firebaseUser.uid);
       const userSnap = await getDoc(userRef);
 
       let userData;
@@ -104,7 +105,6 @@ export const AuthProvider = ({ children }) => {
           createdAt: new Date().toISOString(),
           lastLogin: new Date().toISOString(),
         };
-
         await setDoc(userRef, userData);
       } else {
         userData = userSnap.data();
@@ -131,10 +131,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Auth state listener
+  // Auth state listener — runs on app load & whenever auth changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-      setRoleLoading(true);if (firebaseUser) {
+      setRoleLoading(true);
+
+      if (firebaseUser) {
         const userData = await fetchUserData(firebaseUser.uid);
         setUser({ ...firebaseUser, ...userData });
         setUserRole(userData.role || null);
@@ -158,7 +160,8 @@ export const AuthProvider = ({ children }) => {
     login,
     loginWithGoogle,
     logout,
-    registerUser, // ✅ FIXED (this was missing before)
+    registerUser,          // ✅ primary name used by Register.jsx
+    signup: registerUser,  // ✅ alias — safe to use either name in other components
   };
 
   return (

@@ -72,14 +72,15 @@ const inputCls = (err) =>
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signup, loginWithGoogle } = useAuth();
+  // ✅ FIX: was `signup` (undefined) — now correctly destructured as `registerUser`
+  const { registerUser, loginWithGoogle } = useAuth();
   const role = searchParams.get("role") || "buyer";
 
-  const [form, setForm]     = useState(INITIAL);
-  const [errors, setErrors] = useState({});
-  const [showPw, setShowPw] = useState(false);
+  const [form, setForm]       = useState(INITIAL);
+  const [errors, setErrors]   = useState({});
+  const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState("");
+  const [error, setError]     = useState("");
 
   const isAgent     = role === "agent";
   const portalTitle = isAgent ? "Agent Portal" : "Buyer Portal";
@@ -104,15 +105,19 @@ const Register = () => {
       setLoading(true);
       setError("");
 
-      const displayName = `${form.firstName} ${form.lastName}`;
-      await signup(form.email, form.password, displayName, role);
-      // ✅ No manual navigate — App.jsx /register route auto-redirects via RoleBasedRedirect
+      // ✅ FIX: was `signup(email, password, displayName, role)` — wrong name + wrong signature
+      // Now correctly calls `registerUser(email, password, { displayName, role })`
+      await registerUser(form.email, form.password, {
+        displayName: `${form.firstName} ${form.lastName}`,
+        role,
+      });
+      // No manual navigate — App.jsx /register route auto-redirects via RoleBasedRedirect
       // once onAuthStateChanged fires and sets user
     } catch (err) {
       console.error("Registration error:", err);
-      if (err.code === 'auth/email-already-in-use') {
+      if (err.code === "auth/email-already-in-use") {
         setError("This email is already registered. Please sign in instead.");
-      } else if (err.code === 'auth/weak-password') {
+      } else if (err.code === "auth/weak-password") {
         setError("Password should be at least 6 characters.");
       } else {
         setError("Failed to create account. Please try again.");
