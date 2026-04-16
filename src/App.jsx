@@ -15,10 +15,6 @@ import Contact from "./pages/Contact";
 import Verification from "./pages/Verification";
 import AgentDashboard from "./pages/dashboard/AgentDashboard";
 import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
-import AgentVerification from "./pages/dashboard/AgentVerification";
-import AgentSettings from "./pages/dashboard/AgentSettings";
-import BuyerVerification from "./pages/dashboard/BuyerVerification";
-import BuyerSettings from "./pages/dashboard/BuyerSettings";
 
 const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
@@ -28,56 +24,27 @@ const RoleBasedRedirect = () => {
   return <Navigate to="/dashboard/buyer" replace />;
 };
 
-// ─── Only show Navbar on public pages ────────────────────────────────────────
 const ConditionalNavbar = () => {
   const { pathname } = useLocation();
-  const isDashboard = pathname.startsWith("/dashboard");
-  if (isDashboard) return null;
+  if (pathname.startsWith("/dashboard")) return null;
   return <Navbar />;
 };
 
 const AppRoutes = () => {
   const { user } = useAuth();
-
   return (
     <>
       <ConditionalNavbar />
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/browse" element={<Browse />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/"            element={<Home />} />
+        <Route path="/browse"      element={<Browse />} />
+        <Route path="/about"       element={<About />} />
+        <Route path="/contact"     element={<Contact />} />
         <Route path="/property/:id" element={<PropertyDetails />} />
+        <Route path="/login"       element={user ? <RoleBasedRedirect /> : <Login />} />
+        <Route path="/register"    element={user ? <RoleBasedRedirect /> : <Register />} />
+        <Route path="/verify"      element={<ProtectedRoute><Verification /></ProtectedRoute>} />
 
-        {/* Auth Routes */}
-        <Route path="/login" element={user ? <RoleBasedRedirect /> : <Login />} />
-        <Route path="/register" element={user ? <RoleBasedRedirect /> : <Register />} />
-
-        {/* Verification */}
-        <Route path="/verify" element={
-          <ProtectedRoute>
-            <Verification />
-          </ProtectedRoute>
-        } />
-
-        {/* ─── BUYER DASHBOARD ROUTES ───────────────────────────────────────── */}
-        {/* Specific routes FIRST (before wildcard) */}
-        <Route path="/dashboard/buyer/verification" element={
-          <ProtectedRoute allowedRoles={["buyer"]}>
-            <BuyerVerification />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/dashboard/buyer/settings" element={
-          <ProtectedRoute allowedRoles={["buyer"]}>
-            <VerificationGuard requireVerification={true}>
-              <BuyerSettings />
-            </VerificationGuard>
-          </ProtectedRoute>
-        } />
-
-        {/* Wildcard route LAST */}
         <Route path="/dashboard/buyer/*" element={
           <ProtectedRoute allowedRoles={["buyer"]}>
             <VerificationGuard requireVerification={true}>
@@ -86,23 +53,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* ─── AGENT DASHBOARD ROUTES ───────────────────────────────────────── */}
-        {/* Specific routes FIRST (before wildcard) */}
-        <Route path="/dashboard/agent/verification" element={
-          <ProtectedRoute allowedRoles={["agent"]}>
-            <AgentVerification />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/dashboard/agent/settings" element={
-          <ProtectedRoute allowedRoles={["agent"]}>
-            <VerificationGuard requireVerification={true}>
-              <AgentSettings />
-            </VerificationGuard>
-          </ProtectedRoute>
-        } />
-
-        {/* Wildcard route LAST */}
         <Route path="/dashboard/agent/*" element={
           <ProtectedRoute allowedRoles={["agent"]}>
             <VerificationGuard requireVerification={true}>
@@ -113,7 +63,6 @@ const AppRoutes = () => {
 
         <Route path="/dashboard" element={<RoleBasedRedirect />} />
 
-        {/* 404 */}
         <Route path="*" element={
           <div className="h-screen flex items-center justify-center bg-[#F7F4EF]">
             <div className="text-center">
