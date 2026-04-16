@@ -91,18 +91,6 @@ const Sidebar = ({ active, setActive, open, setOpen, navigate }) => (
     <aside className={`fixed top-0 left-0 h-screen w-60 bg-[#0A1628] z-30 flex flex-col transition-transform duration-300
       ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:z-auto`}>
 
-      {/* Logo — clicks back to homepage */}
-      <div className="px-5 py-4 border-b border-[#1A2E4A]">
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 group w-full">
-          <div className="w-8 h-8 rounded-lg bg-[#C9A84C] flex items-center justify-center flex-shrink-0">
-            <Home size={15} className="text-[#0A1628]" />
-          </div>
-          <span className="text-[#F7F4EF] text-sm font-bold group-hover:text-[#C9A84C] transition-colors">RealEstate</span>
-        </button>
-      </div>
-
       {/* Agent mini profile */}
       <div className="px-5 py-4 border-b border-[#1A2E4A]">
         <div className="flex items-center gap-3">
