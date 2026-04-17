@@ -1,4 +1,3 @@
-// src/components/AgentSidebar.jsx
 import {
   Home, Rss, FileText, Calendar, MessageCircle,
   TrendingUp, User, ShieldCheck, Settings, AlertTriangle
@@ -17,8 +16,11 @@ const NAV = [
   { icon: Settings,      label: "Settings",     id: "settings"     },
 ];
 
-const AgentSidebar = ({ active, setActive, open, setOpen, agent }) => {
+const AgentSidebar = ({ active, setActive, open, setOpen, agent, hidden }) => {
   const navigate = useNavigate();
+
+  // ✅ When add listing overlay is open, hide sidebar completely
+  if (hidden) return null;
 
   return (
     <>

@@ -163,7 +163,6 @@ const PlaceholderTab = ({ label }) => (
   </div>
 );
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
 const AgentDashboard = () => {
   const navigate = useNavigate();
   const [active,         setActive]         = useState("overview");
@@ -194,11 +193,10 @@ const AgentDashboard = () => {
   const showBackBar  = active !== "overview";
 
   return (
-    // ✅ relative so the fixed overlay is scoped correctly
-    <div className="min-h-screen bg-[#F7F4EF] relative">
+    <div className="min-h-screen bg-[#F7F4EF]">
 
-      {/* ── Normal dashboard layout ── */}
-      <div className="flex h-screen">
+      {/* ── Normal dashboard — hidden when add listing is open ── */}
+      <div className={`flex h-screen ${showAddListing ? "hidden" : ""}`}>
         <AgentSidebar
           active={active}
           setActive={goTo}
@@ -208,7 +206,6 @@ const AgentDashboard = () => {
         />
 
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Top bar */}
           <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <button onClick={() => setSidebarOpen(true)}
               className="md:hidden w-9 h-9 rounded-xl border border-[#E0D9CF] flex items-center justify-center text-[#0A1628] flex-shrink-0">
@@ -231,7 +228,6 @@ const AgentDashboard = () => {
             </button>
           </div>
 
-          {/* Main content — dashboard tabs only, NO AddListing here */}
           <main className="flex-1 overflow-y-auto p-5 sm:p-6">
             {active === "overview"     && <OverviewTab setActive={goTo} onAddListing={() => setShowAddListing(true)} />}
             {active === "feed"         && <AgentFeed />}
@@ -246,11 +242,9 @@ const AgentDashboard = () => {
         </div>
       </div>
 
-      {/* ✅ Add Listing — fixed full screen overlay, completely above the dashboard */}
+      {/* ✅ Add Listing — replaces entire screen, no sidebar, no overlap */}
       {showAddListing && (
-        <div className="fixed inset-0 z-50 bg-[#F7F4EF] flex flex-col">
-
-          {/* Overlay top bar */}
+        <div className="flex flex-col h-screen bg-[#F7F4EF]">
           <div className="bg-white border-b border-[#E0D9CF] px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <button
               onClick={() => { setShowAddListing(false); setActive("listings"); }}
@@ -265,12 +259,9 @@ const AgentDashboard = () => {
               </div>
             </button>
           </div>
-
-          {/* Scrollable form */}
           <div className="flex-1 overflow-y-auto p-5 sm:p-6">
             <AddListing onBack={() => { setShowAddListing(false); setActive("listings"); }} />
           </div>
-
         </div>
       )}
 
