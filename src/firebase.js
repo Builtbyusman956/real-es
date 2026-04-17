@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC3BSaH6KT3s6dHKV-ZmA-uX_rd1KKJLJE",        // ← Replace with real key
+  apiKey: "AIzaSyC3BSaH6KT3s6dHKV-ZmA-uX_rd1KKJLJE",        
   authDomain: "real-es-f854c.firebaseapp.com",
   projectId: "real-es-f854c",
   storageBucket: "real-es-f854c.appspot.com",
@@ -18,7 +18,7 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, {
   experimentalAutoDetectLongPolling: true,
   localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager() // handles multi-tab, replaces enableIndexedDbPersistence
+    tabManager: persistentMultipleTabManager() 
   }),
 });
 
