@@ -7,6 +7,8 @@ import {
   GoogleAuthProvider,
   signOut,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  reload,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -19,12 +21,13 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]           = useState(null);
-  const [userRole, setUserRole]   = useState(null);
-  const [loading, setLoading]     = useState(true);
+  const [user, setUser]               = useState(null);
+  const [userRole, setUserRole]       = useState(null);
+  const [loading, setLoading]         = useState(true);
   const [roleLoading, setRoleLoading] = useState(true);
 
-  // Fetch user data from Firestore
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
   const fetchUserData = async (uid) => {
     try {
       const userSnap = await getDoc(doc(db, "users", uid));
@@ -35,20 +38,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Register with email & password
-  // Usage: registerUser(email, password, { displayName, role })
+  // ── Register (email/password) ────────────────────────────────────────────
+  // Creates account + sends verification email immediately.
+  // User is stored in state but ProtectedRoute blocks them until
+  // emailVerified === true.
   const registerUser = async (email, password, extraData = {}) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
+      const firebaseUser   = userCredential.user;
+
+      // Send verification email straight after account creation
+      await sendEmailVerification(firebaseUser);
 
       const userData = {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
+        uid:         firebaseUser.uid,
+        email:       firebaseUser.email,
         displayName: extraData.displayName || "",
-        role: extraData.role || "buyer",
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
+        role:        extraData.role || "buyer",
+        createdAt:   new Date().toISOString(),
+        lastLogin:   new Date().toISOString(),
       };
 
       await setDoc(doc(db, "users", firebaseUser.uid), userData);
@@ -63,13 +71,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login with email & password
+  // Alias so both names work across the codebase
+  const signup = registerUser;
+
+  // ── Resend verification email ────────────────────────────────────────────
+  const resendVerificationEmail = async () => {
+    if (!auth.currentUser) throw new Error("No user signed in.");
+    await sendEmailVerification(auth.currentUser);
+  };
+
+  // ── Refresh Firebase user — checks emailVerified from server ─────────────
+  // Returns true if now verified, false if still pending.
+  const refreshUser = async () => {
+    if (!auth.currentUser) return false;
+    await reload(auth.currentUser);          // force re-fetch from Firebase server
+    const userData = await fetchUserData(auth.currentUser.uid);
+    setUser({ ...auth.currentUser, ...userData });
+    return auth.currentUser.emailVerified;
+  };
+
+  // ── Login (email/password) ───────────────────────────────────────────────
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-
-      const userData = await fetchUserData(firebaseUser.uid);
+      const firebaseUser   = userCredential.user;
+      const userData       = await fetchUserData(firebaseUser.uid);
 
       setUser({ ...firebaseUser, ...userData });
       setUserRole(userData.role || null);
@@ -81,29 +107,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Google sign-in / sign-up
+  // ── Google sign-in / sign-up ─────────────────────────────────────────────
+  // Google accounts are already verified — no email step needed.
   const loginWithGoogle = async (selectedRole) => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
 
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result       = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
-
-      const userRef  = doc(db, "users", firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
+      const userRef      = doc(db, "users", firebaseUser.uid);
+      const userSnap     = await getDoc(userRef);
 
       let userData;
-
       if (!userSnap.exists()) {
         userData = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
+          uid:         firebaseUser.uid,
+          email:       firebaseUser.email,
           displayName: firebaseUser.displayName || "",
-          photoURL: firebaseUser.photoURL || "",
-          role: selectedRole || "buyer",
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString(),
+          photoURL:    firebaseUser.photoURL    || "",
+          role:        selectedRole || "buyer",
+          createdAt:   new Date().toISOString(),
+          lastLogin:   new Date().toISOString(),
         };
         await setDoc(userRef, userData);
       } else {
@@ -120,7 +145,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout
+  // ── Logout ───────────────────────────────────────────────────────────────
   const logout = async () => {
     try {
       await signOut(auth);
@@ -131,7 +156,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Auth state listener — runs on app load & whenever auth changes
+  // ── Auth state listener ──────────────────────────────────────────────────
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       setRoleLoading(true);
@@ -160,8 +185,10 @@ export const AuthProvider = ({ children }) => {
     login,
     loginWithGoogle,
     logout,
-    registerUser,          // ✅ primary name used by Register.jsx
-    signup: registerUser,  // ✅ alias — safe to use either name in other components
+    registerUser,
+    signup,                   // alias for registerUser
+    resendVerificationEmail,  // ← NEW
+    refreshUser,              // ← NEW
   };
 
   return (

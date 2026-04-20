@@ -26,11 +26,8 @@ const Hero = () => {
     priceRange: "Any Price"
   });
 
-  const [showRequestModal, setShowRequestModal] = useState(false);
-
   const handleSearch = (e) => {
     e.preventDefault();
-    // Build query string from searchData and navigate to browse
     const query = new URLSearchParams({
       type: searchData.type,
       property: searchData.propertyType,
@@ -39,29 +36,28 @@ const Hero = () => {
       baths: searchData.baths,
       price: searchData.priceRange
     }).toString();
-    
     navigate(`/browse?${query}`);
   };
 
   const propertyTypes = ["All Types", "Apartment", "House", "Land", "Commercial", "Duplex", "Bungalow"];
-  const bedOptions = ["Any", "1", "2", "3", "4", "5+"];
-  const bathOptions = ["Any", "1", "2", "3", "4+"];
-  const priceRanges = ["Any Price", "₦0 - ₦500K", "₦500K - ₦1M", "₦1M - ₦5M", "₦5M - ₦10M", "₦10M - ₦50M", "₦50M+"];
+  const bedOptions    = ["Any", "1", "2", "3", "4", "5+"];
+  const bathOptions   = ["Any", "1", "2", "3", "4+"];
+  const priceRanges   = ["Any Price", "₦0 - ₦500K", "₦500K - ₦1M", "₦1M - ₦5M", "₦5M - ₦10M", "₦10M - ₦50M", "₦50M+"];
 
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
-      
+
       {/* Background */}
       <div className="absolute inset-0">
         <img src={bgImg} alt="Real estate background" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/95 via-[#0A1628]/75 to-[#0A1628]/40" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-20">
-        
+      {/* Content — extra bottom padding so content never overlaps scroll indicator */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-20 pb-36">
+
         <div className="max-w-5xl mx-auto text-center">
-          
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 border border-[#C9A84C]/40 bg-[#C9A84C]/10 text-[#C9A84C] text-xs font-semibold uppercase tracking-widest px-4 py-2 rounded-full mb-6 backdrop-blur-sm">
             <RiBuildingLine size={14} />
@@ -72,25 +68,25 @@ const Hero = () => {
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#F7F4EF] leading-tight mb-4 tracking-tight">
             Find Your Perfect <span className="text-[#C9A84C]">Property</span>
           </h1>
-          
+
           <p className="text-[#8A9BB5] text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-            Verified listings, trusted agents, secure transactions. 
+            Verified listings, trusted agents, secure transactions.
             Search thousands of properties across Nigeria.
           </p>
 
-          {/* MAIN SEARCH BAR - Nawy Style */}
+          {/* Search Bar */}
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-2 shadow-2xl">
-            
+
             {/* Toggle Buy/Rent/Land */}
             <div className="flex gap-1 mb-2 p-1">
               {["Buy", "Rent", "Land"].map((type) => (
                 <button
                   key={type}
-                  onClick={() => setSearchData({...searchData, type})}
+                  onClick={() => setSearchData({ ...searchData, type })}
                   className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
-                    searchData.type === type 
-                      ? 'bg-[#C9A84C] text-[#0A1628]' 
-                      : 'text-[#8A9BB5] hover:text-[#F7F4EF] hover:bg-white/5'
+                    searchData.type === type
+                      ? "bg-[#C9A84C] text-[#0A1628]"
+                      : "text-[#8A9BB5] hover:text-[#F7F4EF] hover:bg-white/5"
                   }`}
                 >
                   {type}
@@ -100,7 +96,7 @@ const Hero = () => {
 
             {/* Search Inputs */}
             <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-12 gap-2">
-              
+
               {/* Property Type */}
               <div className="md:col-span-2 relative group">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C9A84C]">
@@ -108,7 +104,7 @@ const Hero = () => {
                 </div>
                 <select
                   value={searchData.propertyType}
-                  onChange={(e) => setSearchData({...searchData, propertyType: e.target.value})}
+                  onChange={(e) => setSearchData({ ...searchData, propertyType: e.target.value })}
                   className="w-full pl-10 pr-8 py-3.5 bg-[#0A1628] border border-[#1A2E4A] rounded-xl text-[#F7F4EF] text-sm font-medium focus:border-[#C9A84C] focus:outline-none appearance-none cursor-pointer hover:bg-[#1A2E4A] transition-colors"
                 >
                   {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
@@ -125,7 +121,7 @@ const Hero = () => {
                   type="text"
                   placeholder="Enter location (e.g., Lekki, Abuja, Ibadan)"
                   value={searchData.location}
-                  onChange={(e) => setSearchData({...searchData, location: e.target.value})}
+                  onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
                   className="w-full pl-10 pr-4 py-3.5 bg-[#0A1628] border border-[#1A2E4A] rounded-xl text-[#F7F4EF] text-sm font-medium placeholder-[#6B7280] focus:border-[#C9A84C] focus:outline-none hover:bg-[#1A2E4A] transition-colors"
                 />
               </div>
@@ -137,7 +133,7 @@ const Hero = () => {
                 </div>
                 <select
                   value={searchData.beds}
-                  onChange={(e) => setSearchData({...searchData, beds: e.target.value})}
+                  onChange={(e) => setSearchData({ ...searchData, beds: e.target.value })}
                   className="w-full pl-10 pr-8 py-3.5 bg-[#0A1628] border border-[#1A2E4A] rounded-xl text-[#F7F4EF] text-sm font-medium focus:border-[#C9A84C] focus:outline-none appearance-none cursor-pointer hover:bg-[#1A2E4A] transition-colors"
                 >
                   {bedOptions.map(opt => <option key={opt} value={opt}>{opt} Beds</option>)}
@@ -152,7 +148,7 @@ const Hero = () => {
                 </div>
                 <select
                   value={searchData.baths}
-                  onChange={(e) => setSearchData({...searchData, baths: e.target.value})}
+                  onChange={(e) => setSearchData({ ...searchData, baths: e.target.value })}
                   className="w-full pl-10 pr-8 py-3.5 bg-[#0A1628] border border-[#1A2E4A] rounded-xl text-[#F7F4EF] text-sm font-medium focus:border-[#C9A84C] focus:outline-none appearance-none cursor-pointer hover:bg-[#1A2E4A] transition-colors"
                 >
                   {bathOptions.map(opt => <option key={opt} value={opt}>{opt} Baths</option>)}
@@ -167,7 +163,7 @@ const Hero = () => {
                 </div>
                 <select
                   value={searchData.priceRange}
-                  onChange={(e) => setSearchData({...searchData, priceRange: e.target.value})}
+                  onChange={(e) => setSearchData({ ...searchData, priceRange: e.target.value })}
                   className="w-full pl-10 pr-8 py-3.5 bg-[#0A1628] border border-[#1A2E4A] rounded-xl text-[#F7F4EF] text-sm font-medium focus:border-[#C9A84C] focus:outline-none appearance-none cursor-pointer hover:bg-[#1A2E4A] transition-colors"
                 >
                   {priceRanges.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -175,7 +171,7 @@ const Hero = () => {
                 <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] pointer-events-none" size={16} />
               </div>
 
-              {/* Search Button - Full width on mobile */}
+              {/* Search Button */}
               <div className="md:col-span-12 mt-2">
                 <button
                   type="submit"
@@ -189,10 +185,10 @@ const Hero = () => {
             </form>
           </div>
 
-          {/* Alternative Option - Post Request */}
+          {/* Post a Request */}
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
             <span className="text-[#8A9BB5]">Can't find what you're looking for?</span>
-            <button 
+            <button
               onClick={() => navigate("/post-request")}
               className="group flex items-center gap-2 text-[#C9A84C] font-semibold hover:text-[#e8c87a] transition-colors"
             >
@@ -211,8 +207,8 @@ const Hero = () => {
             {[
               { value: "5,000+", label: "Properties" },
               { value: "1,200+", label: "Verified Agents" },
-              { value: "₦2B+", label: "Transactions" },
-              { value: "0", label: "Fraud Cases" }
+              { value: "₦2B+",   label: "Transactions" },
+              { value: "0",      label: "Fraud Cases" },
             ].map((stat, idx) => (
               <div key={idx} className="text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl">
                 <p className="text-2xl font-bold text-[#C9A84C] mb-1">{stat.value}</p>
@@ -239,13 +235,14 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
-        <span className="text-[#8A9BB5] text-xs uppercase tracking-widest">Scroll to explore</span>
-        <div className="w-6 h-10 border-2 border-[#C9A84C]/30 rounded-full flex justify-center p-2">
+      {/* Scroll indicator — lifted higher with bottom-12, more gap from content above */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer">
+        <span className="text-[#8A9BB5] text-[10px] uppercase tracking-[0.2em]">Scroll to explore</span>
+        <div className="w-6 h-10 border border-[#C9A84C]/40 rounded-full flex justify-center pt-2">
           <div className="w-1 h-2 bg-[#C9A84C] rounded-full animate-bounce" />
         </div>
       </div>
+
     </section>
   );
 };

@@ -14,6 +14,8 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import BuyerFeed from "./BuyerFeed";
 import Messages from "./Messages";
+import BuyerProfile from "./BuyerProfile";
+
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const BUYER = {
@@ -401,6 +403,8 @@ const BuyerDashboard = () => {
           {active === "searches"    && <SearchesTab  navigate={navigate} />}
           {active === "messages"    && <Messages />}
           {active === "requests"    && <Placeholder  label="My Requests" icon={RiFileListLine} />}
+          {active === "profile" && <BuyerProfile />}
+
         </main>
       </div>
     </div>
