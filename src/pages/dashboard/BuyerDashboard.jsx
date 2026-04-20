@@ -15,6 +15,7 @@ import { useAuth } from "../../context/AuthContext";
 import BuyerFeed from "./BuyerFeed";
 import Messages from "./Messages";
 import BuyerProfile from "./BuyerProfile";
+import MyRequests from "./MyRequests";
 
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -48,6 +49,7 @@ const NAV_ITEMS = [
   { id: "searches",    label: "Searches",     icon: RiSearchLine   },
   { id: "messages",    label: "Messages",     icon: RiUserLine     },
   { id: "requests",    label: "My Requests",  icon: RiFileListLine },
+  { id: "profile",     label: "Profile",      icon: RiUserLine     },
 ];
 
 // ─── Top Navbar ───────────────────────────────────────────────────────────────
@@ -89,7 +91,7 @@ const DashboardTopbar = ({ active, sidebarOpen, setSidebarOpen }) => {
           <span className="hidden sm:block">Back to Home</span>
         </button>
 
-        <button
+        <button onClick={() => navigate("/post-request")}
           className="flex items-center gap-1.5 bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] text-xs font-bold px-3 py-1.5 rounded-lg transition duration-200">
           <RiAddCircleLine size={14} />
           <span className="hidden sm:block">Post Request</span>
@@ -402,7 +404,7 @@ const BuyerDashboard = () => {
           {active === "inspections" && <InspectionsTab />}
           {active === "searches"    && <SearchesTab  navigate={navigate} />}
           {active === "messages"    && <Messages />}
-          {active === "requests"    && <Placeholder  label="My Requests" icon={RiFileListLine} />}
+          {active === "requests"    && <MyRequests onPostNew={() => navigate("/post-request")} />}
           {active === "profile" && <BuyerProfile />}
 
         </main>

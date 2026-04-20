@@ -13,9 +13,10 @@ import PropertyDetails from "./pages/PropertyDetails";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Verification from "./pages/Verification";
-import VerifyOTP from "./pages/VerifyOTP";
+import VerifyEmail from "./pages/VerifyEmail";
 import AgentDashboard from "./pages/dashboard/AgentDashboard";
 import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
+import PostRequest from "./pages/PostRequest";
 
 const RoleBasedRedirect = () => {
   const { user, userRole, roleLoading } = useAuth();
@@ -27,7 +28,7 @@ const RoleBasedRedirect = () => {
 
 const ConditionalNavbar = () => {
   const { pathname } = useLocation();
-  const hide = pathname.startsWith("/dashboard") || pathname === "/verify-otp";
+  const hide = pathname.startsWith("/dashboard") || pathname === "/verify-email";
   if (hide) return null;
   return <Navbar />;
 };
@@ -38,31 +39,30 @@ const AppRoutes = () => {
     <>
       <ConditionalNavbar />
       <Routes>
-        {/* ── Public ─────────────────────────────────────────────── */}
+
+        {/* ── Public ── */}
         <Route path="/"             element={<Home />} />
         <Route path="/browse"       element={<Browse />} />
         <Route path="/about"        element={<About />} />
         <Route path="/contact"      element={<Contact />} />
         <Route path="/property/:id" element={<PropertyDetails />} />
+        <Route path="/post-request" element={<PostRequest />} />
 
-        {/* Redirect logged-in users away from auth pages */}
+        {/* ── Auth ── */}
         <Route path="/login"    element={user ? <RoleBasedRedirect /> : <Login />} />
         <Route path="/register" element={user ? <RoleBasedRedirect /> : <Register />} />
 
-        {/* ── SMS OTP verification screen ─────────────────────────
-            Only accessible when signed in but not yet verified     */}
-        <Route path="/verify-otp" element={
-          user
-            ? <VerifyOTP />
-            : <Navigate to="/login" replace />
+        {/* ── Email verification screen ── */}
+        <Route path="/verify-email" element={
+          user ? <VerifyEmail /> : <Navigate to="/login" replace />
         } />
 
-        {/* Legacy route kept for backward compat */}
+        {/* ── Legacy ── */}
         <Route path="/verify" element={
           <ProtectedRoute><Verification /></ProtectedRoute>
         } />
 
-        {/* ── Protected dashboards ────────────────────────────────  */}
+        {/* ── Dashboards ── */}
         <Route path="/dashboard/buyer/*" element={
           <ProtectedRoute allowedRoles={["buyer"]}>
             <VerificationGuard requireVerification={true}>
@@ -81,7 +81,7 @@ const AppRoutes = () => {
 
         <Route path="/dashboard" element={<RoleBasedRedirect />} />
 
-        {/* ── 404 ─────────────────────────────────────────────────  */}
+        {/* ── 404 ── */}
         <Route path="*" element={
           <div className="h-screen flex items-center justify-center bg-[#F7F4EF]">
             <div className="text-center">
@@ -99,6 +99,7 @@ const AppRoutes = () => {
             </div>
           </div>
         } />
+
       </Routes>
     </>
   );

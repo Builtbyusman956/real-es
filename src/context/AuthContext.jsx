@@ -7,6 +7,8 @@ import {
   GoogleAuthProvider,
   signOut,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  reload,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
@@ -37,24 +39,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ── Register (email/password) ────────────────────────────────────────────
-  // Creates Firebase Auth account + saves full profile to Firestore.
-  // Does NOT send email verification — SMS OTP handled by backend.
+  // Creates account, saves full profile to Firestore, sends email verification.
   const registerUser = async (email, password, extraData = {}) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser   = userCredential.user;
 
+      // Send email verification
+      await sendEmailVerification(firebaseUser);
+
       const userData = {
         uid:           firebaseUser.uid,
         email:         firebaseUser.email,
-        displayName:   extraData.displayName  || "",
-        firstName:     extraData.firstName    || "",
-        lastName:      extraData.lastName     || "",
-        phone:         extraData.phone        || "",
-        country:       extraData.country      || "",
-        newsletter:    extraData.newsletter   || false,
-        role:          extraData.role         || "buyer",
-        phoneVerified: false,                    // set to true after OTP
+        displayName:   extraData.displayName || "",
+        firstName:     extraData.firstName   || "",
+        lastName:      extraData.lastName    || "",
+        phone:         extraData.phone       || "",
+        country:       extraData.country     || "",
+        newsletter:    extraData.newsletter  || false,
+        role:          extraData.role        || "buyer",
+        phoneVerified: false,   // verified later inside dashboard
         photoURL:      "",
         createdAt:     new Date().toISOString(),
         lastLogin:     new Date().toISOString(),
@@ -74,14 +78,19 @@ export const AuthProvider = ({ children }) => {
 
   const signup = registerUser; // alias
 
-  // ── Refresh user from Firestore after OTP verification ───────────────────
-  // Backend sets phoneVerified:true in Firestore — this picks it up
-  const refreshUserVerification = async () => {
+  // ── Resend email verification ────────────────────────────────────────────
+  const resendVerificationEmail = async () => {
+    if (!auth.currentUser) throw new Error("No user signed in.");
+    await sendEmailVerification(auth.currentUser);
+  };
+
+  // ── Refresh Firebase user — checks emailVerified from server ─────────────
+  const refreshUser = async () => {
     if (!auth.currentUser) return false;
+    await reload(auth.currentUser);
     const userData = await fetchUserData(auth.currentUser.uid);
     setUser({ ...auth.currentUser, ...userData });
-    setUserRole(userData.role || null);
-    return userData.phoneVerified === true;
+    return auth.currentUser.emailVerified;
   };
 
   // ── Update profile ───────────────────────────────────────────────────────
@@ -89,6 +98,17 @@ export const AuthProvider = ({ children }) => {
     if (!auth.currentUser) throw new Error("Not signed in");
     const userRef = doc(db, "users", auth.currentUser.uid);
     await updateDoc(userRef, { ...updates, updatedAt: new Date().toISOString() });
+    const userData = await fetchUserData(auth.currentUser.uid);
+    setUser({ ...auth.currentUser, ...userData });
+  };
+
+  // ── Mark phone as verified (called after SMS OTP inside dashboard) ───────
+  const markPhoneVerified = async () => {
+    if (!auth.currentUser) throw new Error("Not signed in");
+    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+      phoneVerified: true,
+      verifiedAt:    new Date().toISOString(),
+    });
     const userData = await fetchUserData(auth.currentUser.uid);
     setUser({ ...auth.currentUser, ...userData });
   };
@@ -109,7 +129,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ── Google sign-in / sign-up ─────────────────────────────────────────────
-  // Google users skip OTP — they are trusted by default
+  // Google users skip email verification — already trusted.
   const loginWithGoogle = async (selectedRole) => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
@@ -132,7 +152,7 @@ export const AuthProvider = ({ children }) => {
           country:       "",
           photoURL:      firebaseUser.photoURL || "",
           role:          selectedRole || "buyer",
-          phoneVerified: true,   // Google = trusted, skip OTP
+          phoneVerified: false,  // still needs phone verification inside dashboard
           newsletter:    false,
           createdAt:     new Date().toISOString(),
           lastLogin:     new Date().toISOString(),
@@ -140,7 +160,6 @@ export const AuthProvider = ({ children }) => {
         await setDoc(userRef, userData);
       } else {
         userData = userSnap.data();
-        // Update lastLogin
         await updateDoc(userRef, { lastLogin: new Date().toISOString() });
       }
 
@@ -196,8 +215,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     registerUser,
     signup,
-    refreshUserVerification,
+    resendVerificationEmail,
+    refreshUser,
     updateProfile,
+    markPhoneVerified,
   };
 
   return (
