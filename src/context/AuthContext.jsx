@@ -7,10 +7,8 @@ import {
   GoogleAuthProvider,
   signOut,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
-  reload,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -39,24 +37,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ── Register (email/password) ────────────────────────────────────────────
-  // Creates account + sends verification email immediately.
-  // User is stored in state but ProtectedRoute blocks them until
-  // emailVerified === true.
+  // Creates Firebase Auth account + saves full profile to Firestore.
+  // Does NOT send email verification — SMS OTP handled by backend.
   const registerUser = async (email, password, extraData = {}) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser   = userCredential.user;
 
-      // Send verification email straight after account creation
-      await sendEmailVerification(firebaseUser);
-
       const userData = {
-        uid:         firebaseUser.uid,
-        email:       firebaseUser.email,
-        displayName: extraData.displayName || "",
-        role:        extraData.role || "buyer",
-        createdAt:   new Date().toISOString(),
-        lastLogin:   new Date().toISOString(),
+        uid:           firebaseUser.uid,
+        email:         firebaseUser.email,
+        displayName:   extraData.displayName  || "",
+        firstName:     extraData.firstName    || "",
+        lastName:      extraData.lastName     || "",
+        phone:         extraData.phone        || "",
+        country:       extraData.country      || "",
+        newsletter:    extraData.newsletter   || false,
+        role:          extraData.role         || "buyer",
+        phoneVerified: false,                    // set to true after OTP
+        photoURL:      "",
+        createdAt:     new Date().toISOString(),
+        lastLogin:     new Date().toISOString(),
       };
 
       await setDoc(doc(db, "users", firebaseUser.uid), userData);
@@ -71,23 +72,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Alias so both names work across the codebase
-  const signup = registerUser;
+  const signup = registerUser; // alias
 
-  // ── Resend verification email ────────────────────────────────────────────
-  const resendVerificationEmail = async () => {
-    if (!auth.currentUser) throw new Error("No user signed in.");
-    await sendEmailVerification(auth.currentUser);
-  };
-
-  // ── Refresh Firebase user — checks emailVerified from server ─────────────
-  // Returns true if now verified, false if still pending.
-  const refreshUser = async () => {
+  // ── Refresh user from Firestore after OTP verification ───────────────────
+  // Backend sets phoneVerified:true in Firestore — this picks it up
+  const refreshUserVerification = async () => {
     if (!auth.currentUser) return false;
-    await reload(auth.currentUser);          // force re-fetch from Firebase server
     const userData = await fetchUserData(auth.currentUser.uid);
     setUser({ ...auth.currentUser, ...userData });
-    return auth.currentUser.emailVerified;
+    setUserRole(userData.role || null);
+    return userData.phoneVerified === true;
+  };
+
+  // ── Update profile ───────────────────────────────────────────────────────
+  const updateProfile = async (updates) => {
+    if (!auth.currentUser) throw new Error("Not signed in");
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    await updateDoc(userRef, { ...updates, updatedAt: new Date().toISOString() });
+    const userData = await fetchUserData(auth.currentUser.uid);
+    setUser({ ...auth.currentUser, ...userData });
   };
 
   // ── Login (email/password) ───────────────────────────────────────────────
@@ -96,10 +99,8 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser   = userCredential.user;
       const userData       = await fetchUserData(firebaseUser.uid);
-
       setUser({ ...firebaseUser, ...userData });
       setUserRole(userData.role || null);
-
       return userCredential;
     } catch (error) {
       console.error("Login error:", error);
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ── Google sign-in / sign-up ─────────────────────────────────────────────
-  // Google accounts are already verified — no email step needed.
+  // Google users skip OTP — they are trusted by default
   const loginWithGoogle = async (selectedRole) => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
@@ -122,17 +123,25 @@ export const AuthProvider = ({ children }) => {
       let userData;
       if (!userSnap.exists()) {
         userData = {
-          uid:         firebaseUser.uid,
-          email:       firebaseUser.email,
-          displayName: firebaseUser.displayName || "",
-          photoURL:    firebaseUser.photoURL    || "",
-          role:        selectedRole || "buyer",
-          createdAt:   new Date().toISOString(),
-          lastLogin:   new Date().toISOString(),
+          uid:           firebaseUser.uid,
+          email:         firebaseUser.email,
+          displayName:   firebaseUser.displayName || "",
+          firstName:     firebaseUser.displayName?.split(" ")[0] || "",
+          lastName:      firebaseUser.displayName?.split(" ").slice(1).join(" ") || "",
+          phone:         "",
+          country:       "",
+          photoURL:      firebaseUser.photoURL || "",
+          role:          selectedRole || "buyer",
+          phoneVerified: true,   // Google = trusted, skip OTP
+          newsletter:    false,
+          createdAt:     new Date().toISOString(),
+          lastLogin:     new Date().toISOString(),
         };
         await setDoc(userRef, userData);
       } else {
         userData = userSnap.data();
+        // Update lastLogin
+        await updateDoc(userRef, { lastLogin: new Date().toISOString() });
       }
 
       setUser({ ...firebaseUser, ...userData });
@@ -186,9 +195,9 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     logout,
     registerUser,
-    signup,                   // alias for registerUser
-    resendVerificationEmail,  // ← NEW
-    refreshUser,              // ← NEW
+    signup,
+    refreshUserVerification,
+    updateProfile,
   };
 
   return (

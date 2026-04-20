@@ -1,11 +1,10 @@
 // src/pages/Register.jsx
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Home, ShieldCheck, Building2, MapPin } from "lucide-react";
+import { Eye, EyeOff, Home, ShieldCheck, Building2, MapPin } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import bgImg from "../assets/realestate.avif";
 
-// All 195 countries
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
   "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
@@ -44,14 +43,13 @@ const validate = ({ firstName, lastName, email, phone, password, country, agreed
   if (!firstName.trim()) e.firstName = "First name is required.";
   if (!lastName.trim())  e.lastName  = "Last name is required.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Enter a valid email.";
-  if (!/^\+?[0-9]{7,15}$/.test(phone))           e.phone = "Enter a valid phone number.";
+  if (!/^\+?[0-9]{7,15}$/.test(phone))           e.phone = "Enter a valid phone number (include country code e.g. +234...).";
   if (password.length < 8)                        e.password = "Password must be at least 8 characters.";
   if (!country)                                   e.country = "Please select your country.";
   if (!agreed)                                    e.agreed = "You must agree to our policies.";
   return e;
 };
 
-// ── Reusable components ───────────────────────────────────────────────────────
 const FieldError = ({ msg }) =>
   msg ? <p className="text-xs text-red-400 mt-0.5">{msg}</p> : null;
 
@@ -68,13 +66,11 @@ const inputCls = (err) =>
    focus:ring-2 focus:ring-[#C9A84C] focus:border-[#C9A84C]
    ${err ? "border-red-400 ring-1 ring-red-300" : "border-[#E0D9CF] hover:border-[#C9A84C]/50"}`;
 
-// ── Main ─────────────────────────────────────────────────────────────────────
 const Register = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  // ✅ FIX: was `signup` (undefined) — now correctly destructured as `registerUser`
+  const navigate        = useNavigate();
+  const [searchParams]  = useSearchParams();
   const { registerUser, loginWithGoogle } = useAuth();
-  const role = searchParams.get("role") || "buyer";
+  const role            = searchParams.get("role") || "buyer";
 
   const [form, setForm]       = useState(INITIAL);
   const [errors, setErrors]   = useState({});
@@ -88,7 +84,7 @@ const Register = () => {
   const submitText  = isAgent ? "Create Agent Account" : "Create Buyer Account";
   const postScript  = isAgent
     ? "Agent ID & BVN verification happens inside your dashboard after sign-up."
-    : "Start browsing verified properties immediately after sign-up.";
+    : "You'll verify your phone number next to activate your account.";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -105,20 +101,27 @@ const Register = () => {
       setLoading(true);
       setError("");
 
-      // ✅ FIX: was `signup(email, password, displayName, role)` — wrong name + wrong signature
-      // Now correctly calls `registerUser(email, password, { displayName, role })`
+      // Pass ALL form fields so Firestore profile is complete from day 1
       await registerUser(form.email, form.password, {
         displayName: `${form.firstName} ${form.lastName}`,
+        firstName:   form.firstName,
+        lastName:    form.lastName,
+        phone:       form.phone,
+        country:     form.country,
+        newsletter:  form.newsletter,
         role,
       });
-      // No manual navigate — App.jsx /register route auto-redirects via RoleBasedRedirect
-      // once onAuthStateChanged fires and sets user
+
+      // After signup, user is not phoneVerified yet
+      // ProtectedRoute will redirect them to /verify-otp automatically
     } catch (err) {
       console.error("Registration error:", err);
       if (err.code === "auth/email-already-in-use") {
         setError("This email is already registered. Please sign in instead.");
       } else if (err.code === "auth/weak-password") {
         setError("Password should be at least 6 characters.");
+      } else if (err.code === "auth/network-request-failed") {
+        setError("Network error. Please check your connection and try again.");
       } else {
         setError("Failed to create account. Please try again.");
       }
@@ -135,7 +138,13 @@ const Register = () => {
       navigate(isAgent ? "/dashboard/agent" : "/dashboard/buyer");
     } catch (err) {
       console.error("Google sign-up error:", err);
-      setError("Failed to sign up with Google. Please try again.");
+      if (err.code === "auth/network-request-failed") {
+        setError("Network error. Please check your connection and try again.");
+      } else if (err.code === "auth/popup-closed-by-user") {
+        setError("Sign-up cancelled. Please try again.");
+      } else {
+        setError("Failed to sign up with Google. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -143,24 +152,19 @@ const Register = () => {
 
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center px-4 py-20">
-
-      {/* Background */}
       <div className="absolute inset-0">
         <img src={bgImg} alt="background" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/65 to-[#0A1628]/20" />
       </div>
 
-      {/* Card */}
       <div className="relative z-10 w-full max-w-md bg-[#F7F4EF] rounded-3xl shadow-2xl shadow-[#0A1628]/40 overflow-hidden">
 
-        {/* Header */}
         <div className="bg-[#0A1628] px-6 pt-6 pb-5">
           <div className="flex items-center gap-2 mb-1">
-            {isAgent ? (
-              <ShieldCheck size={14} className="text-[#C9A84C]" />
-            ) : (
-              <Home size={14} className="text-[#C9A84C]" />
-            )}
+            {isAgent
+              ? <ShieldCheck size={14} className="text-[#C9A84C]" />
+              : <Home size={14} className="text-[#C9A84C]" />
+            }
             <p className="text-[#C9A84C] text-[10px] font-semibold uppercase tracking-[0.18em]">
               {portalTitle}
             </p>
@@ -170,10 +174,8 @@ const Register = () => {
           </h2>
           <p className="text-[#8A9BB5] text-sm mt-1">
             Already have an account?{" "}
-            <button
-              onClick={() => navigate("/login")}
-              className="text-[#C9A84C] underline font-medium hover:text-[#E8D5A3] transition"
-            >
+            <button onClick={() => navigate("/login")}
+              className="text-[#C9A84C] underline font-medium hover:text-[#E8D5A3] transition">
               Sign in
             </button>
           </p>
@@ -187,27 +189,18 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} noValidate className="px-6 py-5 flex flex-col gap-4">
 
-          {/* Google button */}
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={handleGoogleSignUp}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 w-full border border-[#E0D9CF] bg-white rounded-xl py-2.5 text-sm font-medium text-[#0A1628] hover:border-[#C9A84C]/50 hover:bg-[#F7F4EF] active:scale-95 transition duration-200 disabled:opacity-50"
-            >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-              Continue with Google
-            </button>
-          </div>
+          <button type="button" onClick={handleGoogleSignUp} disabled={loading}
+            className="flex items-center justify-center gap-2 w-full border border-[#E0D9CF] bg-white rounded-xl py-2.5 text-sm font-medium text-[#0A1628] hover:border-[#C9A84C]/50 hover:bg-[#F7F4EF] active:scale-95 transition duration-200 disabled:opacity-50">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
+            Continue with Google
+          </button>
 
-          {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-[#E0D9CF]" />
             <span className="text-[10px] text-[#6B7280] font-medium uppercase tracking-widest">or sign up with email</span>
             <div className="flex-1 h-px bg-[#E0D9CF]" />
           </div>
 
-          {/* Name row */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="First Name" error={errors.firstName}>
               <input name="firstName" placeholder="Ada" value={form.firstName}
@@ -224,8 +217,8 @@ const Register = () => {
               value={form.email} onChange={handleChange} className={inputCls(errors.email)} />
           </Field>
 
-          <Field label="Phone Number" error={errors.phone}>
-            <input name="phone" type="tel" placeholder="+234 800 000 0000"
+          <Field label="Phone Number (with country code)" error={errors.phone}>
+            <input name="phone" type="tel" placeholder="+2348012345678"
               value={form.phone} onChange={handleChange} className={inputCls(errors.phone)} />
           </Field>
 
@@ -241,7 +234,6 @@ const Register = () => {
             </div>
           </Field>
 
-          {/* Country dropdown */}
           <Field label="Country" error={errors.country}>
             <div className="relative">
               <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
@@ -253,7 +245,6 @@ const Register = () => {
             </div>
           </Field>
 
-          {/* Checkboxes */}
           <div className="flex flex-col gap-2.5 pt-1">
             <label className="flex items-start gap-2.5 cursor-pointer group">
               <input type="checkbox" name="newsletter" checked={form.newsletter}
@@ -263,7 +254,6 @@ const Register = () => {
                 Send me property listings, market updates and tips via email.
               </span>
             </label>
-
             <label className="flex items-start gap-2.5 cursor-pointer group">
               <input type="checkbox" name="agreed" checked={form.agreed}
                 onChange={handleChange}
@@ -278,22 +268,16 @@ const Register = () => {
             <FieldError msg={errors.agreed} />
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-3 rounded-xl text-sm font-bold transition duration-200 mt-1 flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {loading ? (
-              <div className="w-4 h-4 border-2 border-[#0A1628] border-t-transparent rounded-full animate-spin" />
-            ) : (
-              isAgent ? <Building2 size={16} /> : <Home size={16} />
-            )}
+          <button type="submit" disabled={loading}
+            className="w-full bg-[#C9A84C] hover:bg-[#b8943d] active:scale-95 text-[#0A1628] py-3 rounded-xl text-sm font-bold transition duration-200 mt-1 flex items-center justify-center gap-2 disabled:opacity-50">
+            {loading
+              ? <div className="w-4 h-4 border-2 border-[#0A1628] border-t-transparent rounded-full animate-spin" />
+              : isAgent ? <Building2 size={16} /> : <Home size={16} />
+            }
             {submitText}
           </button>
 
           <p className="text-center text-xs text-[#6B7280]">{postScript}</p>
-
         </form>
       </div>
     </section>

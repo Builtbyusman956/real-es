@@ -31,4 +31,5 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw?server/serviceAccountKey.json
+serviceAccountKey.json

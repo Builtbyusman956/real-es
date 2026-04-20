@@ -13,7 +13,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Verification from "./pages/Verification";
-import VerifyEmail from "./pages/VerifyEmail";           // ← NEW
+import VerifyOTP from "./pages/VerifyOTP";
 import AgentDashboard from "./pages/dashboard/AgentDashboard";
 import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
 
@@ -27,8 +27,8 @@ const RoleBasedRedirect = () => {
 
 const ConditionalNavbar = () => {
   const { pathname } = useLocation();
-  // Also hide navbar on the verify-email screen — it's a standalone blocking page
-  if (pathname.startsWith("/dashboard") || pathname === "/verify-email") return null;
+  const hide = pathname.startsWith("/dashboard") || pathname === "/verify-otp";
+  if (hide) return null;
   return <Navbar />;
 };
 
@@ -38,7 +38,7 @@ const AppRoutes = () => {
     <>
       <ConditionalNavbar />
       <Routes>
-        {/* ── Public ───────────────────────────────────────────────────── */}
+        {/* ── Public ─────────────────────────────────────────────── */}
         <Route path="/"             element={<Home />} />
         <Route path="/browse"       element={<Browse />} />
         <Route path="/about"        element={<About />} />
@@ -49,24 +49,20 @@ const AppRoutes = () => {
         <Route path="/login"    element={user ? <RoleBasedRedirect /> : <Login />} />
         <Route path="/register" element={user ? <RoleBasedRedirect /> : <Register />} />
 
-        {/* ── Email verification screen ─────────────────────────────────
-            Accessible to any signed-in user (verified or not).
-            ProtectedRoute with no allowedRoles just checks user exists.
-            Once they verify, ProtectedRoute inside dashboards lets them through. */}
-        <Route path="/verify-email" element={
+        {/* ── SMS OTP verification screen ─────────────────────────
+            Only accessible when signed in but not yet verified     */}
+        <Route path="/verify-otp" element={
           user
-            ? <VerifyEmail />
+            ? <VerifyOTP />
             : <Navigate to="/login" replace />
         } />
 
-        {/* Legacy /verify route kept for backward compat */}
+        {/* Legacy route kept for backward compat */}
         <Route path="/verify" element={
-          <ProtectedRoute>
-            <Verification />
-          </ProtectedRoute>
+          <ProtectedRoute><Verification /></ProtectedRoute>
         } />
 
-        {/* ── Protected dashboards ─────────────────────────────────────── */}
+        {/* ── Protected dashboards ────────────────────────────────  */}
         <Route path="/dashboard/buyer/*" element={
           <ProtectedRoute allowedRoles={["buyer"]}>
             <VerificationGuard requireVerification={true}>
@@ -85,7 +81,7 @@ const AppRoutes = () => {
 
         <Route path="/dashboard" element={<RoleBasedRedirect />} />
 
-        {/* ── 404 ──────────────────────────────────────────────────────── */}
+        {/* ── 404 ─────────────────────────────────────────────────  */}
         <Route path="*" element={
           <div className="h-screen flex items-center justify-center bg-[#F7F4EF]">
             <div className="text-center">
@@ -96,10 +92,8 @@ const AppRoutes = () => {
               <p className="text-[#6B7280] mb-6 max-w-xs mx-auto">
                 The page you're looking for doesn't exist or has been moved.
               </p>
-              <a
-                href="/"
-                className="inline-flex items-center gap-2 bg-[#C9A84C] hover:bg-[#b8943d] text-[#0A1628] font-bold px-6 py-3 rounded-xl transition duration-200"
-              >
+              <a href="/"
+                className="inline-flex items-center gap-2 bg-[#C9A84C] hover:bg-[#b8943d] text-[#0A1628] font-bold px-6 py-3 rounded-xl transition duration-200">
                 Back to Home
               </a>
             </div>
